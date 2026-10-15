@@ -77,11 +77,17 @@
 
 .btn-primary {flex:1;min-height:48px;border-radius:12px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;border:0;font-size:16px}
 
-.btn-secondary {width:48px;min-height:48px;border-radius:12px;background:rgb(var(--surface));border:1px solid rgb(var(--line));color:rgb(var(--fg));display:flex;align-items:center;justify-content:center}
+.btn-secondary {width:48px;min-height:48px;border-radius:12px;background:rgb(var(--surface));border:1px solid rgb(var(--line));color:rgb(var(--fg));display:flex;align-items:center;justify-content:center;padding:0}
+
+.btn-secondary svg {flex:none}
+
 
 .hint {text-align:center;font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:12px}
 
-.tabs {position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:390px;max-width:100%;height:calc(64px + env(safe-area-inset-bottom, 0px));padding-bottom:env(safe-area-inset-bottom, 0px);background:rgb(var(--surface));border-top:1px solid rgb(var(--line));display:flex;z-index:30}
+/* Anchored to the bottom edge of the app column (as the spec drew it, and as
+   the column's bottom padding reserves room for), so the actions and the hint
+   always sit fully above it — never floating over them on a short window. */
+.tabs {position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:390px;max-width:100%;height:calc(64px + env(safe-area-inset-bottom, 0px));padding-bottom:env(safe-area-inset-bottom, 0px);background:rgb(var(--surface));border-top:1px solid rgb(var(--line));display:flex;z-index:30}
 
 .tabs div {flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;line-height:20px;color:rgb(var(--muted));cursor:pointer;white-space:nowrap}
 
@@ -100,7 +106,12 @@ svg {stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-
 /* The "On en a parlé" button, once talked: quiet, not filled. */
 .btn-primary.done {background:rgb(var(--raised));color:rgb(var(--fg));border:1px solid rgb(var(--line));box-shadow:none}
 
-.hi[role="button"] {cursor:pointer}
+/* The error state: room above it, and a clear step before the Retry button. */
+#error-state {padding-top:120px}
+#error-state .btn-primary {margin-top:8px}
+
+/* The header's profile link: a 44px tap height, its look unchanged. */
+.hi[role="button"] {cursor:pointer;padding:12px 0;margin:-12px 0}
 
 .back-link {background:none;border:0;padding:0;min-height:44px;color:rgb(var(--accent));font-size:14px;line-height:20px;font-weight:600;cursor:pointer;font-family:inherit}
 
@@ -113,6 +124,12 @@ svg {stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-
 .fav-q {width:100%;font-family:ui-serif,Georgia,serif;font-size:18px;line-height:26px;font-weight:600}
 
 .ob {padding-top:56px;display:flex;flex-direction:column;gap:16px}
+
+.ob-step-label {font-size:14px;line-height:20px;color:rgb(var(--muted));margin-bottom:8px}
+
+.ob .ob-sub {margin-bottom:24px}
+
+.ob .btn-primary {width:100%;margin-top:24px}
 
 .ob-sub {font-size:16px;line-height:24px;color:rgb(var(--muted))}
 

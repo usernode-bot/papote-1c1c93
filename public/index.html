@@ -135,7 +135,7 @@
 
     <!-- Error: what failed, what still works, one Retry -->
     <div id="error-state" class="state-error" hidden>
-      <div class="err-title">Impossible de charger le sujet du jour</div>
+      <div class="err-title">Impossible de charger le sujet du&nbsp;jour</div>
       <p class="state-msg">Vos favoris et votre série sont conservés.</p>
       <button id="retry-btn" class="btn-primary">Réessayer</button>
     </div>
@@ -144,6 +144,7 @@
     <section id="onboard" hidden>
       <div class="ob">
         <div id="ob-step1">
+          <div class="ob-step-label">Étape 1 sur 2</div>
           <div class="title">Bienvenue dans Papote</div>
           <p class="ob-sub">Un sujet de discussion à deux, chaque jour, adapté à l'âge de votre enfant.</p>
           <label class="field-label" for="ob-name">Prénom de votre enfant</label>
@@ -151,6 +152,7 @@
           <button id="ob-btn1" class="btn-primary" disabled>Continuer</button>
         </div>
         <div id="ob-step2" hidden>
+          <div class="ob-step-label">Étape 2 sur 2</div>
           <div class="title">Son âge</div>
           <p class="ob-sub">Les sujets s'adaptent à la tranche d'âge.</p>
           <div class="chip-grid" id="ob-age-grid"></div>
@@ -188,9 +190,9 @@
       </div>
     </div>
     </section>
-    </div>
 
-    <div class="tabs" id="tabs"><div class="a" id="tab-today" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Aujourd'hui</div><div id="tab-favoris" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg>Favoris · <span id="fav-count"></span></div></div>
+    <div class="tabs" id="tabs"><div class="a" id="tab-today" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Aujourd'hui</div><div id="tab-favoris" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg><span>Favoris · <span id="fav-count"></span></span></div></div>
+    </div>
   </div>
 
   <!-- Profile sheet -->
