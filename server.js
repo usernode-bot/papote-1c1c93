@@ -154,6 +154,281 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
 
+// ── Topics ────────────────────────────────────────────────────────────────
+// The same hand-written library the client renders; the server only uses it
+// to check that a topic id in a request actually exists.
+const PAPOTE_TOPICS = require('./public/topics.js');
+
+// ── Schema (applied idempotently on boot) ─────────────────────────────────
+// Every table is personal data (names, ages, habits), so all three are
+// marked `staging:private`: the schema is copied to staging, never the rows.
+async function applySchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS papote_profiles (
+      user_id text PRIMARY KEY,
+      child_name text NOT NULL CHECK (char_length(child_name) BETWEEN 1 AND 40),
+      child_age int NOT NULL CHECK (child_age BETWEEN 3 AND 16),
+      reminder_time text CHECK (reminder_time IS NULL OR reminder_time ~ '^[0-2][0-9]:[0-5][0-9]$'),
+      is_demo boolean NOT NULL DEFAULT false,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS papote_talks (
+      user_id text NOT NULL,
+      topic_id text NOT NULL,
+      day date NOT NULL,
+      is_demo boolean NOT NULL DEFAULT false,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (user_id, topic_id, day)
+    );
+    CREATE TABLE IF NOT EXISTS papote_favorites (
+      user_id text NOT NULL,
+      topic_id text NOT NULL,
+      is_demo boolean NOT NULL DEFAULT false,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (user_id, topic_id)
+    );
+  `);
+  await pool.query("COMMENT ON TABLE papote_profiles IS 'staging:private'");
+  await pool.query("COMMENT ON TABLE papote_talks IS 'staging:private'");
+  await pool.query("COMMENT ON TABLE papote_favorites IS 'staging:private'");
+}
+
+// ── Day helpers ───────────────────────────────────────────────────────────
+// The client sends its LOCAL day as YYYY-MM-DD (its "today" may differ from
+// the server's). A value within one day of `req.now` is accepted; anything
+// else (malformed, far future or past) is rejected.
+
+// Calendar date -> days since the Unix epoch (UTC, whole days).
+function daysSinceEpoch(day) {
+  const [y, m, d] = day.split('-').map(Number);
+  return Math.round(Date.UTC(y, m - 1, d) / 86400000);
+}
+
+// Validate a client-supplied day against `req.now`; null when unusable.
+function validDay(raw, now) {
+  if (typeof raw !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
+  const [y, m, d] = raw.split('-').map(Number);
+  if (!y || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const date = new Date(Date.UTC(y, m - 1, d));
+  if (Number.isNaN(date.getTime())) return null;
+  const nowDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  if (Math.abs(date - nowDay) > 86400000) return null;
+  return raw;
+}
+
+// YYYY-MM-DD -> the previous / next calendar day.
+function shiftDay(day, days) {
+  return new Date(daysSinceEpoch(day) * 86400000 + days * 86400000)
+    .toISOString().slice(0, 10);
+}
+
+// The Monday-start week containing `day`, as [{date, talked}].
+function weekOf(day) {
+  const dow = new Date(daysSinceEpoch(day) * 86400000).getUTCDay(); // 0=Sunday
+  const monday = daysSinceEpoch(day) - ((dow + 6) % 7);
+  return Array.from({ length: 7 }, (_, i) => new Date((monday + i) * 86400000).toISOString().slice(0, 10));
+}
+
+// Consecutive days with at least one talk, ending today — or yesterday when
+// today has none yet: a streak still counts until the end of the day after
+// the last talk.
+function streakFrom(daysSet, today) {
+  let cursor = daysSet.has(today) ? today : shiftDay(today, -1);
+  let n = 0;
+  while (daysSet.has(cursor)) {
+    n += 1;
+    cursor = shiftDay(cursor, -1);
+  }
+  return n;
+}
+
+const TOPIC_IDS = new Set(PAPOTE_TOPICS.topics.map((t) => t.id));
+
+// ── Routes ────────────────────────────────────────────────────────────────
+
+function requireUser(req, res) {
+  if (!req.user) {
+    res.status(401).json({ error: 'account_required' });
+    return false;
+  }
+  return true;
+}
+
+app.get('/api/state', async (req, res) => {
+  try {
+    const day = validDay(req.query.day, req.now) || new Date(Date.UTC(req.now.getUTCFullYear(), req.now.getUTCMonth(), req.now.getUTCDate())).toISOString().slice(0, 10);
+    if (!req.user) {
+      // Guests get a null profile (the page keeps its read-only copy) and no
+      // personal data of anyone's.
+      return res.json({
+        profile: null,
+        guest: true,
+        streak: 0,
+        week: weekOf(day).map((d) => ({ date: d, talked: false })),
+        talkedToday: [],
+        favorites: [],
+      });
+    }
+    const userId = req.user.id;
+    const demo = IS_STAGING && req.query.demo === '1';
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      if (demo) await writeDemo(client, userId, day);
+      // Demo rows are marked is_demo and stay out of every answer that does
+      // not ask for them, so a plain route still shows a real (or empty)
+      // state even on a database where the demo wrote.
+      const demoFilter = demo ? '' : ' AND is_demo = false';
+      const profileR = await client.query(`SELECT child_name, child_age, reminder_time FROM papote_profiles WHERE user_id = $1${demoFilter}`, [userId]);
+      const talksR = await client.query(`SELECT day::text AS day, topic_id FROM papote_talks WHERE user_id = $1${demoFilter}`, [userId]);
+      const favsR = await client.query(`SELECT topic_id, created_at FROM papote_favorites WHERE user_id = $1${demoFilter} ORDER BY created_at`, [userId]);
+      await client.query('COMMIT');
+      const p = profileR.rows[0];
+      const daysSet = new Set(talksR.rows.map((r) => r.day));
+      return res.json({
+        profile: p ? { child_name: p.child_name, child_age: p.child_age, reminder_time: p.reminder_time } : null,
+        guest: false,
+        streak: streakFrom(daysSet, day),
+        week: weekOf(day).map((d) => ({ date: d, talked: daysSet.has(d) })),
+        talkedToday: talksR.rows.filter((r) => r.day === day).map((r) => r.topic_id),
+        favorites: favsR.rows.map((r) => ({ topic_id: r.topic_id, created_at: r.created_at })),
+      });
+    } finally {
+      client.release();
+    }
+  } catch (err) {
+    console.error('GET /api/state failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.put('/api/profile', async (req, res) => {
+  if (!requireUser(req, res)) return;
+  const { child_name, child_age, reminder_time } = req.body || {};
+  if (typeof child_name !== 'string' || child_name.trim().length < 1 || child_name.trim().length > 40) {
+    return res.status(400).json({ error: 'invalid_name' });
+  }
+  const age = Number(child_age);
+  if (!Number.isInteger(age) || age < 3 || age > 16) {
+    return res.status(400).json({ error: 'invalid_age' });
+  }
+  let reminder = null;
+  if (reminder_time != null) {
+    if (typeof reminder_time !== 'string' || !/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(reminder_time)) {
+      return res.status(400).json({ error: 'invalid_reminder_time' });
+    }
+    reminder = reminder_time;
+  }
+  try {
+    await pool.query(
+      `INSERT INTO papote_profiles (user_id, child_name, child_age, reminder_time)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (user_id) DO UPDATE SET child_name = $2, child_age = $3, reminder_time = $4, is_demo = false`,
+      [req.user.id, child_name.trim(), age, reminder]
+    );
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('PUT /api/profile failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.post('/api/talks', async (req, res) => {
+  if (!requireUser(req, res)) return;
+  const { topic_id, day } = req.body || {};
+  if (!TOPIC_IDS.has(topic_id)) return res.status(400).json({ error: 'unknown_topic' });
+  const d = validDay(day, req.now);
+  if (!d) return res.status(400).json({ error: 'invalid_day' });
+  try {
+    await pool.query(
+      `INSERT INTO papote_talks (user_id, topic_id, day) VALUES ($1, $2, $3)
+       ON CONFLICT (user_id, topic_id, day) DO UPDATE SET is_demo = false`,
+      [req.user.id, topic_id, d]
+    );
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('POST /api/talks failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.delete('/api/talks/:topic_id', async (req, res) => {
+  if (!requireUser(req, res)) return;
+  const d = validDay(req.query.day, req.now);
+  if (!d) return res.status(400).json({ error: 'invalid_day' });
+  try {
+    await pool.query('DELETE FROM papote_talks WHERE user_id = $1 AND topic_id = $2 AND day = $3', [req.user.id, req.params.topic_id, d]);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/talks failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.put('/api/favorites/:topic_id', async (req, res) => {
+  if (!requireUser(req, res)) return;
+  if (!TOPIC_IDS.has(req.params.topic_id)) return res.status(400).json({ error: 'unknown_topic' });
+  try {
+    await pool.query(
+      `INSERT INTO papote_favorites (user_id, topic_id) VALUES ($1, $2)
+       ON CONFLICT (user_id, topic_id) DO UPDATE SET is_demo = false`,
+      [req.user.id, req.params.topic_id]
+    );
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('PUT /api/favorites failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.delete('/api/favorites/:topic_id', async (req, res) => {
+  if (!requireUser(req, res)) return;
+  try {
+    await pool.query('DELETE FROM papote_favorites WHERE user_id = $1 AND topic_id = $2', [req.user.id, req.params.topic_id]);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('DELETE /api/favorites failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ── Staging demo ──────────────────────────────────────────────────────────
+// `?demo=1` on staging, first /api/state of a viewer with no profile: write
+// Léa's profile, a 12-day streak and 8 favourites, in one transaction, all
+// ON CONFLICT DO NOTHING so it is idempotent. Rows are demo data for the
+// viewer themself (this app's first version, per the platform's demo rule).
+async function writeDemo(client, userId, today) {
+  const startedAt = Date.now();
+  // Only when the viewer has no profile at all (demo or real).
+  const existing = await client.query('SELECT user_id FROM papote_profiles WHERE user_id = $1', [userId]);
+  if (existing.rows.length > 0) return;
+  await client.query(
+    `INSERT INTO papote_profiles (user_id, child_name, child_age, reminder_time, is_demo)
+     VALUES ($1, 'Léa', 7, '19:00', true) ON CONFLICT (user_id) DO NOTHING`,
+    [userId]
+  );
+  // Talks on each of the 12 days before today: a 12-day streak, today free.
+  for (let i = 1; i <= 12; i += 1) {
+    const day = shiftDay(today, -i);
+    const topicId = PAPOTE_TOPICS.topics[daysSinceEpoch(day) % PAPOTE_TOPICS.topics.length].id;
+    await client.query(
+      `INSERT INTO papote_talks (user_id, topic_id, day, is_demo) VALUES ($1, $2, $3, true)
+       ON CONFLICT (user_id, topic_id, day) DO NOTHING`,
+      [userId, topicId, day]
+    );
+  }
+  // 8 favourites across varied themes and age bands.
+  const favIds = ['peur', 'jour-parfait', 'animaux', 'musique', 'écran', 'copains', 'trésor', 'courage'];
+  for (const topicId of favIds) {
+    await client.query(
+      `INSERT INTO papote_favorites (user_id, topic_id, is_demo) VALUES ($1, $2, true)
+       ON CONFLICT (user_id, topic_id) DO NOTHING`,
+      [userId, topicId]
+    );
+  }
+  console.log('demo data written in ' + (Date.now() - startedAt) + ' ms');
+}
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // HTML shell: serve the app if authenticated. Unauthenticated top-level
@@ -191,10 +466,33 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ── Lifecycle ─────────────────────────────────────────────────────────────
+let server = null;
+let closing = false;
+
 async function start() {
-  const server = app.listen(port, () => console.log(`Listening on :${port}`));
+  await applySchema();
+  server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
 }
+
+// Stop accepting, drain for about 3 s, close the pool, exit.
+async function shutdown(signal) {
+  if (closing) return;
+  closing = true;
+  console.log(`${signal}: shutting down`);
+  if (server) {
+    server.close();
+    if (server.closeIdleConnections) server.closeIdleConnections();
+  }
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  await pool.end();
+  process.exit(0);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
 
 start().catch(err => { console.error(err); process.exit(1); });

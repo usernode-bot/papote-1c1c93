@@ -56,63 +56,33 @@ its silence is not proof the checkout is current. Inside Homeroom (its dev
 chat, and Homeroom bot's builds) the platform fixes the base commit, and none
 of this applies.
 
-## Starter template
-
-The screen this app currently ships — the "Starter template" hero with
-the app's thumbnail tile and the plain-English note on how the app gets
-built (by asking Homeroom bot) — is placeholder content from the
-Homeroom starter template, not product intent.
-
-When the user asks for their first real feature, REPLACE the template
-screen rather than building alongside it:
-
-- remove the `usernode-starter-notice@1` block in `public/index.html`
-  (both sentinel comments and everything between them),
-- rewrite `README.md` to describe the actual app.
-
-Keep the `usernode-dev-console@1` forwarder `<script>` when rewriting the
-HTML — that block is platform infrastructure, not template content. So is
-the bridge `<script>`. The design kit is not placeholder either: build the
-real app with it, and fill in "## Design" below.
-
-The screen has a light and a dark look and follows the viewer's Homeroom
-theme, switching live when they change it: the theme `<script>` right after
-the bridge tag sets a `dark` class on `<html>`. Keep that script, and give
-everything you build both looks (the design kit's colour tokens carry both), unless one
-fixed look is the point of this app, like a game's own scene; then say so
-under "## Design" below. Unless a request asks for one, add
-no theme picker: the viewer's Homeroom setting is the control. "The
-platform's light/dark theme inside the app frame" in the platform
-conventions has the details.
-
-If a rule below this line conflicts with the hosted conventions, the
-hosted conventions win. This file is **app-specific** — write down
-things about *this* app that belong in the repo: product intent,
-data-model quirks, style preferences, opt-in policies (e.g. which
-tables you've marked private), etc.
-
----
-
 ## About Papote
 
-Un sujet de discussion parent-enfant chaque jour
-
-_(add a sentence or two more of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Un sujet de discussion parent-enfant chaque jour. Papote gives a parent one
+conversation card a day, suited to their child's age (3 to 16): a main
+question, two follow-ups and a tip for the parent. The parent swipes for
+another topic, saves favourites, and taps « On en a parlé » to grow a daily
+streak. The tone is warm and unhurried — one card, one conversation, one
+job per screen.
 
 ## Design
 
-This app's look. The first real version fills in the blanks; every later
-change follows it, and updates it when a request changes the look on purpose.
+This app's look, set by the first version's spec. Every later change
+follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** warm creams (ground cream, white surface, warm greys for
+  text and lines) with a terracotta accent (the one action colour) and a
+  soft sage for the parent tip. Values live in `styles/tailwind-input.css`
+  as tokens (`--ground`, `--surface`, `--raised`, `--fg`, `--muted`,
+  `--line`, `--accent`, `--on-accent`, `--sage`, `--sage-fg`), a light and
+  a dark value each, the dark one in the same hues.
+- **Signature element:** the topic card drawn like a trading card — a thick
+  raised rim (a 6px ring in `--raised`), an age badge in the corner, the
+  question in a large serif, speech-bubble icons on the follow-ups. The
+  streak is a flame pill; the week is a row of seven bars.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  in `tailwind.config.js`. The card's question is set in the serif stack
+  (`ui-serif`), everything else in the rounded system sans.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -128,20 +98,31 @@ Re-theme by changing the token values there, keeping every text pair at
 - A field's label says what it is; its placeholder, if any, is an example
   that says so ("e.g. 5.0"), never a bare value that could pass for one
   already entered.
-- Each screen sits in `page-column`, one centred column on a wide window.
 - Every screen that loads data has honest loading, empty and error states.
   Never show the empty state while loading or after a failure; an error says
   what failed, what still works, and offers Retry. Loading has the content's
   own shape (its rows, with `skeleton` bars for their text).
-- Seed obviously fake staging demo data so the populated screen can be seen
-  ("Staging mock data" in the platform conventions).
 - No cards in cards, no uppercase eyebrows, no emoji as icons.
-- A header that shows the app's own mark shows the project's icon there
-  (the emoji in `dapp.json`'s `icon` block) or no mark at all: never an
-  empty tile, and never `brand/icon.png`, which the app does not serve.
+- The header shows no app mark (the spec's drawing has none).
+- The main screen's drawn markup (the `usernode-spec-screens@1` block) is
+  the visual target: keep its structure and `screens.css` classes, and fill
+  its values from data.
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- **All three tables are `staging:private`** (`papote_profiles`,
+  `papote_talks`, `papote_favorites`): they hold personal data (a child's
+  name and age, habits). Never drop the `COMMENT ON TABLE` lines.
+- **Demo rows carry `is_demo = true`** and stay out of every `/api/state`
+  answer that is not opened with `?demo=1`, so a plain route still shows
+  its real state on a database where the demo wrote.
+- **All dates are the client's local day** (`YYYY-MM-DD`, sent as `day`);
+  the server accepts only a value within one day of `req.now`. Never use
+  `NOW()` for what shows.
+- **Topics are never generated**: they come from `public/topics.js`, 30
+  hand-written topics in four age-band versions. The server only checks
+  topic ids against the same file.
+- The topic of the day is `topics[daysSinceEpoch(day) % 30]`, one stream
+  for everyone. Passing a topic is not saved.
+- One child per account. Content stays within the platform's content
+  rules — nothing mature, violent or about self-harm, in any age band.

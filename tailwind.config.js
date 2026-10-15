@@ -55,6 +55,8 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        sage: token('sage'), // the parent tip's background
+        'sage-fg': token('sage-fg'), // text on the sage background
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

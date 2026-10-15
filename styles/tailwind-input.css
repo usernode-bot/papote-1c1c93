@@ -29,30 +29,34 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
+    --ground: 250 246 240;    /* the page */
     --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --raised: 243 236 227;    /* hovers, badges */
+    --fg: 34 28 24;           /* text */
+    --muted: 94 84 76;        /* secondary text */
+    --line: 233 224 212;      /* borders, dividers, skeletons */
+    --accent: 178 74 46;     /* the one accent */
     --on-accent: 255 255 255; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 178 74 46;      /* the keyboard focus ring */
+    --sage: 226 236 224; /* from the spec's screens */
+    --sage-fg: 47 84 52; /* from the spec's screens */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 28 22 18;
+    --surface: 40 33 28;
+    --raised: 54 45 38;
+    --fg: 246 239 230;
+    --muted: 186 172 160;
+    --line: 72 62 54;
+    --accent: 240 138 108;
+    --on-accent: 48 16 8;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 240 138 108;
+    --sage: 36 54 38;
+    --sage-fg: 196 222 196;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */

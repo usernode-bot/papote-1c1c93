@@ -7,5 +7,24 @@
   "governance": {
     "preset": "you_or_the_group"
   },
-  "tests": []
+  "tests": [
+    {
+      "name": "Onboarding",
+      "path": "/",
+      "expectText": "Prénom de votre enfant"
+    },
+    {
+      "name": "Today populated (visual, impact public/**)",
+      "id": "today-populated",
+      "path": "/?demo=1",
+      "expectText": "On en a parlé",
+      "visual": true,
+      "impact": ["public/**"]
+    },
+    {
+      "name": "Favourites",
+      "path": "/?demo=1#favoris",
+      "expectText": "Favoris"
+    }
+  ]
 }
