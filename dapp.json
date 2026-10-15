@@ -1,0 +1,11 @@
+{
+  "description": "Un sujet de discussion parent-enfant chaque jour",
+  "icon": {
+    "emoji": "💬"
+  },
+  "secrets": [],
+  "governance": {
+    "preset": "you_or_the_group"
+  },
+  "tests": []
+}
