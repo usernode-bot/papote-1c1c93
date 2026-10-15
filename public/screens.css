@@ -16,13 +16,15 @@
 .app {
   background: rgb(var(--ground));
   color: rgb(var(--fg));
-  min-height: 900px;
+  min-height: 100vh;
   width: 390px;
+  max-width: 100%;
+  margin-inline: auto;
   box-sizing: border-box;
   font-family: ui-rounded,system-ui,-apple-system,sans-serif;
   font-size: 16px;
   line-height: 24px;
-  padding: 0 20px;
+  padding: 0 20px calc(88px + env(safe-area-inset-bottom, 0px));
   position: relative;
 }
 
@@ -51,7 +53,7 @@
 
 .d.on i {background:rgb(var(--accent))}
 
-.card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:24px;padding:20px;box-shadow:0 0 0 6px rgb(var(--raised));position:relative}
+.card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:24px;padding:20px;box-shadow:0 0 0 6px rgb(var(--raised));position:relative;touch-action:pan-y}
 
 .meta {display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 
@@ -79,10 +81,73 @@
 
 .hint {text-align:center;font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:12px}
 
-.tabs {position:absolute;left:0;right:0;top:836px;height:64px;background:rgb(var(--surface));border-top:1px solid rgb(var(--line));display:flex}
+.tabs {position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:390px;max-width:100%;height:calc(64px + env(safe-area-inset-bottom, 0px));padding-bottom:env(safe-area-inset-bottom, 0px);background:rgb(var(--surface));border-top:1px solid rgb(var(--line));display:flex;z-index:30}
 
-.tabs div {flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+.tabs div {flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;line-height:20px;color:rgb(var(--muted));cursor:pointer;white-space:nowrap}
 
 .tabs .a {color:rgb(var(--accent));font-weight:600}
 
 svg {stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Behaviour states and new elements (not drawn by the spec) ────────── */
+
+.demo-note {font-size:14px;line-height:20px;color:rgb(var(--muted));text-align:center;padding-top:12px}
+
+.err-title {font-size:18px;line-height:26px;font-weight:700}
+
+.state-msg {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+/* The "On en a parlé" button, once talked: quiet, not filled. */
+.btn-primary.done {background:rgb(var(--raised));color:rgb(var(--fg));border:1px solid rgb(var(--line));box-shadow:none}
+
+.hi[role="button"] {cursor:pointer}
+
+.back-link {background:none;border:0;padding:0;min-height:44px;color:rgb(var(--accent));font-size:14px;line-height:20px;font-weight:600;cursor:pointer;font-family:inherit}
+
+.reminder-line {background:rgb(var(--sage));color:rgb(var(--sage-fg));border-radius:14px;padding:10px 14px;margin-bottom:12px;font-size:14px;line-height:20px;text-align:center}
+
+.fav-row {flex-wrap:wrap;cursor:pointer}
+
+.fav-theme {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.fav-q {width:100%;font-family:ui-serif,Georgia,serif;font-size:18px;line-height:26px;font-weight:600}
+
+.ob {padding-top:56px;display:flex;flex-direction:column;gap:16px}
+
+.ob-sub {font-size:16px;line-height:24px;color:rgb(var(--muted))}
+
+.field-label {display:block;font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin-bottom:8px}
+
+.chip-grid {display:flex;flex-wrap:wrap;gap:8px}
+
+.chip {min-width:44px;min-height:44px;border-radius:999px;background:rgb(var(--surface));border:1px solid rgb(var(--line));color:rgb(var(--fg));font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;padding:0 10px}
+
+.chip.on {background:rgb(var(--accent));border-color:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+.sheet-backdrop {position:fixed;inset:0;background:rgb(var(--fg) / 0.4);z-index:40}
+
+.sheet {position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:390px;max-width:100%;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-bottom:0;border-radius:24px 24px 0 0;padding:12px 20px calc(20px + env(safe-area-inset-bottom, 0px));z-index:41;max-height:85vh;overflow:auto}
+
+.sheet-head {display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+
+.sheet-title {font-size:16px;font-weight:600}
+
+.sheet-link {background:none;border:0;padding:0;min-height:44px;color:rgb(var(--accent));font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+
+.sheet-row {display:flex;align-items:center;justify-content:space-between;min-height:44px;margin-top:8px}
+
+.sheet-row-label {font-size:16px}
+
+.switch {position:relative;width:48px;height:28px;border-radius:999px;background:rgb(var(--line));border:1px solid rgb(var(--line));transition:background .15s ease;flex:none;cursor:pointer}
+
+.switch::after {content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:999px;background:rgb(var(--surface));transition:left .15s ease}
+
+.switch.on {background:rgb(var(--accent));border-color:rgb(var(--accent))}
+
+.switch.on::after {left:22px}
+
+.toast {position:fixed;bottom:calc(80px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);max-width:90%;background:rgb(var(--fg));color:rgb(var(--ground));border-radius:999px;padding:8px 16px;font-size:14px;line-height:20px;z-index:50;text-align:center}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch, .switch::after, .card, .btn-primary {transition:none !important}
+}

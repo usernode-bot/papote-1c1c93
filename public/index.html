@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <script>
   // usernode-dev-console@1
   (function () {
@@ -64,7 +64,7 @@
   })();
   </script>
   <title>Papote</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%237c3aed'/><circle cx='50' cy='50' r='18' fill='white'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='72' rx='18' fill='%23B24A2E'/><path d='M18 70 L18 92 L40 70 Z' fill='%23B24A2E'/><circle cx='34' cy='36' r='5' fill='white'/><circle cx='50' cy='36' r='5' fill='white'/><circle cx='66' cy='36' r='5' fill='white'/></svg>">
   <!-- Tailwind, PRECOMPILED for this app (was cdn.tailwindcss.com's
        in-browser engine plus an inline tailwind.config here). The config
        moved to tailwind.config.js in the repo root; npm run build compiles
@@ -109,34 +109,567 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       that are right in both looks, and components for buttons, fields,
-       lists, cards and data states. The real app keeps the kit; CLAUDE.md's
-       "## Design" says how. -->
-  <!-- (Named in prose on purpose: Tailwind compiles any class-name word in
-       these files, comments included, and the starter should ship only the
-       components its screen uses.) -->
   <!-- usernode-spec-screens@1: the screens the spec drew, carried over by the platform as this
        first version's starting point. Their styles are in public/screens.css.
        Change them where behaviour needs it; do not redraw them. -->
   <div data-spec-screen="1">
-    <div class="app">
-    <div class="top"><div><div class="hi">Papote · pour Léa, 7 ans</div><div class="title">Sujet du jour</div></div>
-    <div class="streak"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z"/></svg>12 jours</div></div>
-    <div class="days"><div class="d on"><i></i>L</div><div class="d on"><i></i>M</div><div class="d on"><i></i>M</div><div class="d on"><i></i>J</div><div class="d on"><i></i>V</div><div class="d"><i></i>S</div><div class="d"><i></i>D</div></div>
-    <div class="card">
-    <div class="meta"><span class="badge">6-9 ans</span><span class="theme">Émotions</span></div>
-    <div class="q">Quelle a été ta plus grande peur cette semaine, et qu'est-ce qui t'a fait du bien ?</div>
-    <div class="section-label">Pour relancer</div>
-    <div class="r"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Et dans ton corps, tu l'as senti où ?</span></div>
-    <div class="r"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Qui pourrait t'aider la prochaine fois ?</span></div>
-    <div class="tip"><b>Conseil pour vous</b>Racontez d'abord une peur de votre enfance. Écoutez sans corriger ni rassurer trop vite.</div>
+    <div class="app" id="app-root">
+    <div class="demo-note" id="demo-note" data-usernode-demo-note hidden>Staging demo</div>
+
+    <!-- Loading: the content's own shape, skeleton bars where the text goes -->
+    <div id="loading">
+      <div class="top"><div><div class="hi"><span class="skeleton" style="display:inline-block;width:140px;height:14px"></span></div><div class="title"><span class="skeleton" style="display:block;width:170px;height:28px"></span></div></div>
+      <span class="skeleton" style="display:block;width:96px;height:40px;border-radius:999px"></span></div>
+      <div class="days"><span class="skeleton" style="flex:1;height:12px;border-radius:4px"></span><span class="skeleton" style="flex:1;height:12px;border-radius:4px"></span><span class="skeleton" style="flex:1;height:12px;border-radius:4px"></span><span class="skeleton" style="flex:1;height:12px;border-radius:4px"></span><span class="skeleton" style="flex:1;height:12px;border-radius:4px"></span><span class="skeleton" style="flex:1;height:12px;border-radius:4px"></span><span class="skeleton" style="flex:1;height:12px;border-radius:4px"></span></div>
+      <div class="card">
+        <div class="meta"><span class="skeleton" style="display:inline-block;width:64px;height:20px;border-radius:999px"></span><span class="skeleton" style="display:inline-block;width:70px;height:14px"></span></div>
+        <span class="skeleton" style="display:block;width:100%;height:22px;margin:4px 0 10px"></span>
+        <span class="skeleton" style="display:block;width:80%;height:22px;margin-bottom:20px"></span>
+        <div class="section-label">Pour relancer</div>
+        <span class="skeleton" style="display:block;width:90%;height:16px;margin:12px 0"></span>
+        <span class="skeleton" style="display:block;width:70%;height:16px;margin-bottom:16px"></span>
+        <span class="skeleton" style="display:block;width:100%;height:64px;border-radius:14px"></span>
+      </div>
+      <div class="acts"><span class="skeleton" style="width:48px;height:48px;border-radius:12px"></span><span class="skeleton" style="flex:1;height:48px;border-radius:12px"></span><span class="skeleton" style="width:48px;height:48px;border-radius:12px"></span></div>
     </div>
-    <div class="acts"><div class="btn-secondary" aria-label="Ajouter aux favoris"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg></div><button class="btn-primary"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>On en a parlé</button><div class="btn-secondary" aria-label="Sujet suivant"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M5 5l7 7-7 7M13 5l7 7-7 7"/></svg></div></div>
-    <div class="hint">Glissez la carte pour passer au sujet suivant</div>
-    <div class="tabs"><div class="a"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Aujourd'hui</div><div><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg>Favoris · 8</div></div>
+
+    <!-- Error: what failed, what still works, one Retry -->
+    <div id="error-state" class="state-error" hidden>
+      <div class="err-title">Impossible de charger le sujet du jour</div>
+      <p class="state-msg">Vos favoris et votre série sont conservés.</p>
+      <button id="retry-btn" class="btn-primary">Réessayer</button>
+    </div>
+
+    <!-- Onboarding, two steps -->
+    <section id="onboard" hidden>
+      <div class="ob">
+        <div id="ob-step1">
+          <div class="title">Bienvenue dans Papote</div>
+          <p class="ob-sub">Un sujet de discussion à deux, chaque jour, adapté à l'âge de votre enfant.</p>
+          <label class="field-label" for="ob-name">Prénom de votre enfant</label>
+          <input id="ob-name" class="field" type="text" maxlength="40" autocomplete="off" placeholder="par ex. Léa">
+          <button id="ob-btn1" class="btn-primary" disabled>Continuer</button>
+        </div>
+        <div id="ob-step2" hidden>
+          <div class="title">Son âge</div>
+          <p class="ob-sub">Les sujets s'adaptent à la tranche d'âge.</p>
+          <div class="chip-grid" id="ob-age-grid"></div>
+          <button id="ob-btn2" class="btn-primary" disabled>Continuer</button>
+          <button id="ob-back" class="back-link">Retour</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main: today's card, drawn by the spec -->
+    <section id="main-view" hidden>
+    <div class="top"><div><div class="hi" id="hi" role="button" tabindex="0" aria-label="Ouvrir le profil"></div><div class="title" id="title"></div></div>
+    <div class="streak"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z"/></svg><span id="streak-count"></span></div></div>
+    <div class="days" id="days-row"><div class="d"><i></i>L</div><div class="d"><i></i>M</div><div class="d"><i></i>M</div><div class="d"><i></i>J</div><div class="d"><i></i>V</div><div class="d"><i></i>S</div><div class="d"><i></i>D</div></div>
+    <button id="back-link" class="back-link" hidden>Revenir au sujet du jour</button>
+    <div id="reminder-line" class="reminder-line" hidden></div>
+    <div class="card" id="card">
+    <div class="meta"><span class="badge" id="badge"></span><span class="theme" id="theme"></span></div>
+    <div class="q" id="question"></div>
+    <div class="section-label">Pour relancer</div>
+    <div class="r"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span id="fu1"></span></div>
+    <div class="r"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span id="fu2"></span></div>
+    <div class="tip"><b>Conseil pour vous</b><span id="tip-text"></span></div>
+    </div>
+    <div class="acts" id="acts"><div class="btn-secondary" id="fav-btn" role="button" tabindex="0" aria-label="Ajouter aux favoris" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path id="heart-path" d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg></div><button class="btn-primary" id="talk-btn"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span id="talk-label">On en a parlé</span></button><div class="btn-secondary" id="next-btn" role="button" tabindex="0" aria-label="Sujet suivant"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M13 5l7 7-7 7"/></svg></div></div>
+    <div class="hint" id="swipe-hint">Glissez la carte pour passer au sujet suivant</div>
+
+    <!-- Favoris tab -->
+    <div id="favoris-view" hidden>
+      <ul class="list" id="favoris-list"></ul>
+      <div id="favoris-empty" class="state-empty" hidden>
+        <div class="err-title">Aucun favori pour l'instant</div>
+        <p class="state-msg">Mettez de côté les sujets qui vous plaisent avec le cœur.</p>
+        <button id="fav-empty-back" class="btn-primary">Voir le sujet du jour</button>
+      </div>
+    </div>
+    </section>
+    </div>
+
+    <div class="tabs" id="tabs"><div class="a" id="tab-today" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Aujourd'hui</div><div id="tab-favoris" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg>Favoris · <span id="fav-count"></span></div></div>
+  </div>
+
+  <!-- Profile sheet -->
+  <div id="sheet-backdrop" class="sheet-backdrop" hidden></div>
+  <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Profil" hidden>
+    <div class="sheet-head"><button id="sh-cancel" class="sheet-link">Annuler</button><div class="sheet-title">Profil</div><button id="sh-save" class="sheet-link">Enregistrer</button></div>
+    <label class="field-label" for="sh-name">Prénom de votre enfant</label>
+    <input id="sh-name" class="field" type="text" maxlength="40" autocomplete="off">
+    <div class="field-label">Son âge</div>
+    <div class="chip-grid" id="sh-age-grid"></div>
+    <div class="sheet-row">
+      <span class="sheet-row-label">Rappel quotidien</span>
+      <button id="sh-reminder" class="switch" role="switch" aria-checked="false" aria-label="Rappel quotidien"></button>
+    </div>
+    <div id="sh-time-row" hidden>
+      <label class="field-label" for="sh-time">Heure du rappel</label>
+      <input id="sh-time" class="field" type="time" value="19:00">
     </div>
   </div>
-  <!-- /usernode-spec-screens@1 -->
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="/topics.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    var TOPICS = window.PAPOTE_TOPICS.topics;
+    var DAY = localDay();
+    var IS_DEMO = new URLSearchParams(location.search).get('demo') === '1';
+    var TOKEN = new URLSearchParams(location.search).get('token') || '';
+
+    var state = null;      // the server's answer
+    var offset = 0;        // 0 = today's topic, 1+ = further along the stream
+    var openedId = null;   // a favourite opened as its own card
+    var tab = 'today';     // 'today' | 'favoris'
+
+    function $(id) { return document.getElementById(id); }
+    function localDay() {
+      var n = new Date();
+      return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+    }
+    function daysSinceEpoch(day) {
+      var p = day.split('-').map(Number);
+      return Math.round(Date.UTC(p[0], p[1] - 1, p[2]) / 86400000);
+    }
+    function bandFor(age) {
+      if (age <= 5) return '3-5';
+      if (age <= 9) return '6-9';
+      if (age <= 12) return '10-12';
+      return '13-16';
+    }
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function api(path, opts) {
+      opts = opts || {};
+      var headers = { 'Content-Type': 'application/json' };
+      if (TOKEN) headers['x-usernode-token'] = TOKEN;
+      return fetch(path, {
+        method: opts.method || 'GET',
+        headers: headers,
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+      }).then(function (res) {
+        if (!res.ok) {
+          return res.json().catch(function () { return {}; }).then(function (body) {
+            var err = new Error('HTTP ' + res.status);
+            err.status = res.status;
+            err.body = body;
+            throw err;
+          });
+        }
+        return res.json();
+      });
+    }
+
+    // ── Toast ──────────────────────────────────────────────────────────────
+    var toastTimer = null;
+    function toast(msg) {
+      var el = $('toast');
+      el.textContent = msg;
+      el.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { el.hidden = true; }, 3500);
+    }
+
+    // ── Loading / error ────────────────────────────────────────────────────
+    function showLoading() {
+      $('loading').hidden = false;
+      $('error-state').hidden = true;
+      $('onboard').hidden = true;
+      $('main-view').hidden = true;
+      $('tabs').style.display = 'none';
+    }
+    function showError() {
+      $('demo-note').hidden = !IS_DEMO;
+      $('loading').hidden = true;
+      $('error-state').hidden = false;
+      $('onboard').hidden = true;
+      $('main-view').hidden = true;
+      $('tabs').style.display = 'none';
+    }
+    function showApp() {
+      $('demo-note').hidden = !IS_DEMO;
+      $('loading').hidden = true;
+      $('error-state').hidden = true;
+      $('onboard').hidden = state.profile != null || state.guest;
+      $('main-view').hidden = !$('onboard').hidden;
+      $('tabs').style.display = $('onboard').hidden ? '' : 'none';
+      render();
+    }
+
+    function loadState() {
+      showLoading();
+      var url = '/api/state?day=' + DAY + (IS_DEMO ? '&demo=1' : '');
+      return api(url).then(function (data) {
+        state = data;
+        showApp();
+      }, function () {
+        showError();
+      });
+    }
+
+    // ── Rendering ──────────────────────────────────────────────────────────
+    function currentTopic() {
+      if (openedId) {
+        for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i].id === openedId) return TOPICS[i];
+        openedId = null;
+      }
+      var age = state && state.profile ? state.profile.child_age : 7;
+      var idx = ((daysSinceEpoch(DAY) + offset) % TOPICS.length + TOPICS.length) % TOPICS.length;
+      return TOPICS[idx];
+    }
+    function currentBand() {
+      var age = state && state.profile ? state.profile.child_age : 7;
+      return bandFor(age);
+    }
+
+    function render() {
+      var p = state.profile;
+      var isGuest = !!state.guest;
+
+      // Header
+      $('hi').textContent = p ? ('Papote · pour ' + p.child_name + ', ' + p.child_age + ' ans') : 'Papote';
+      $('streak-count').textContent = state.streak + (state.streak === 1 ? ' jour' : ' jours');
+
+      // Week row
+      var cells = $('days-row').children;
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].classList.toggle('on', !!(state.week[i] && state.week[i].talked));
+      }
+
+      // Tab
+      $('tab-today').classList.toggle('a', tab === 'today');
+      $('tab-favoris').classList.toggle('a', tab === 'favoris');
+      $('favoris-view').hidden = tab !== 'favoris';
+      var todayBits = $('main-view').querySelectorAll('#days-row, #card, #acts, #swipe-hint, #back-link, #reminder-line');
+      for (var j = 0; j < todayBits.length; j++) todayBits[j].style.display = tab === 'today' ? '' : 'none';
+      $('title').textContent = tab === 'favoris' ? 'Favoris' : (offset > 0 || openedId ? 'Un autre sujet' : 'Sujet du jour');
+      $('fav-count').textContent = state.favorites.length;
+
+      if (tab === 'favoris') { renderFavoris(); return; }
+      renderCard();
+    }
+
+    function renderCard() {
+      var topic = currentTopic();
+      var band = currentBand();
+      var v = topic[band];
+      var p = state.profile;
+      var isGuest = !!state.guest;
+
+      $('badge').textContent = band + ' ans';
+      $('theme').textContent = topic.theme;
+      $('question').textContent = v.q;
+      $('fu1').textContent = v.followups[0];
+      $('fu2').textContent = v.followups[1];
+      $('tip-text').textContent = v.tip;
+
+      $('back-link').hidden = !(offset > 0 || openedId);
+
+      // Reminder line (in-app daily reminder)
+      var due = p && p.reminder_time && state.talkedToday.length === 0 && reminderDue(p.reminder_time);
+      $('reminder-line').hidden = !due;
+      if (due) $('reminder-line').textContent = 'C’est l’heure de papoter avec ' + p.child_name;
+
+      // Actions
+      $('acts').style.display = isGuest ? 'none' : '';
+      $('swipe-hint').style.display = isGuest ? 'none' : '';
+      var faved = isFaved(topic.id);
+      $('heart-path').style.fill = faved ? 'currentColor' : 'none';
+      $('fav-btn').setAttribute('aria-pressed', faved ? 'true' : 'false');
+      $('fav-btn').setAttribute('aria-label', faved ? 'Retirer des favoris' : 'Ajouter aux favoris');
+      var talked = state.talkedToday.indexOf(topic.id) !== -1;
+      $('talk-btn').classList.toggle('done', talked);
+      $('talk-label').textContent = talked ? 'Vous en avez parlé' : 'On en a parlé';
+    }
+
+    function reminderDue(time) {
+      var now = new Date();
+      var parts = time.split(':').map(Number);
+      return now.getHours() > parts[0] || (now.getHours() === parts[0] && now.getMinutes() >= parts[1]);
+    }
+
+    function isFaved(topicId) {
+      for (var i = 0; i < state.favorites.length; i++) {
+        if (state.favorites[i].topic_id === topicId) return true;
+      }
+      return false;
+    }
+
+    function renderFavoris() {
+      var list = $('favoris-list');
+      var favs = state.favorites.slice().reverse(); // newest first
+      list.innerHTML = '';
+      var band = currentBand();
+      for (var i = 0; i < favs.length; i++) {
+        var topic = null;
+        for (var k = 0; k < TOPICS.length; k++) if (TOPICS[k].id === favs[i].topic_id) topic = TOPICS[k];
+        if (!topic) continue;
+        var li = document.createElement('li');
+        li.className = 'list-row fav-row';
+        li.setAttribute('role', 'button');
+        li.setAttribute('tabindex', '0');
+        li.innerHTML = '<span class="badge">' + esc(topic[band] ? band : '6-9') + ' ans</span>' +
+          '<span class="fav-theme">' + esc(topic.theme) + '</span>' +
+          '<span class="fav-q">' + esc(topic[band].q) + '</span>';
+        li.addEventListener('click', function (id) { return function () { openFavorite(id); }; }(topic.id));
+        li.addEventListener('keydown', function (id) { return function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFavorite(id); } }; }(topic.id));
+        list.appendChild(li);
+      }
+      var empty = favs.length === 0;
+      $('favoris-empty').hidden = !empty;
+      list.hidden = empty;
+    }
+
+    function openFavorite(id) {
+      openedId = id;
+      offset = 0;
+      tab = 'today';
+      render();
+    }
+
+    // ── Actions (optimistic, with rollback) ────────────────────────────────
+    function toggleTalk() {
+      var topic = currentTopic();
+      var had = state.talkedToday.indexOf(topic.id) !== -1;
+      // optimistic
+      if (had) state.talkedToday = state.talkedToday.filter(function (t) { return t !== topic.id; });
+      else state.talkedToday.push(topic.id);
+      renderCard();
+      var req = had
+        ? api('/api/talks/' + encodeURIComponent(topic.id) + '?day=' + DAY, { method: 'DELETE' })
+        : api('/api/talks', { method: 'POST', body: { topic_id: topic.id, day: DAY } });
+      req.then(function () {
+        return loadStateSilent();
+      }, function () {
+        // rollback
+        if (had) state.talkedToday.push(topic.id);
+        else state.talkedToday = state.talkedToday.filter(function (t) { return t !== topic.id; });
+        renderCard();
+        toast('Impossible d’enregistrer, réessaie.');
+      });
+    }
+
+    function toggleFav() {
+      var topic = currentTopic();
+      var had = isFaved(topic.id);
+      // optimistic
+      if (had) state.favorites = state.favorites.filter(function (f) { return f.topic_id !== topic.id; });
+      else state.favorites.push({ topic_id: topic.id, created_at: new Date().toISOString() });
+      render();
+      var req = had
+        ? api('/api/favorites/' + encodeURIComponent(topic.id), { method: 'DELETE' })
+        : api('/api/favorites/' + encodeURIComponent(topic.id), { method: 'PUT' });
+      req.then(function () {
+        return loadStateSilent();
+      }, function () {
+        if (had) state.favorites.push({ topic_id: topic.id, created_at: new Date().toISOString() });
+        else state.favorites = state.favorites.filter(function (f) { return f.topic_id !== topic.id; });
+        render();
+        toast('Impossible d’enregistrer, réessaie.');
+      });
+    }
+
+    function loadStateSilent() {
+      return api('/api/state?day=' + DAY + (IS_DEMO ? '&demo=1' : '')).then(function (data) {
+        state = data;
+        render();
+      });
+    }
+
+    function nextTopic() {
+      openedId = null;
+      offset += 1;
+      render();
+    }
+    function backToToday() {
+      openedId = null;
+      offset = 0;
+      render();
+    }
+    function setTab(t) {
+      tab = t;
+      render();
+    }
+
+    // ── Swipe ──────────────────────────────────────────────────────────────
+    function wireSwipe() {
+      var card = $('card');
+      var sx = null, dx = 0, dragging = false;
+      card.addEventListener('pointerdown', function (e) {
+        if (state == null || state.guest) return;
+        dragging = true; sx = e.clientX; dx = 0;
+        card.style.transition = 'none';
+      });
+      card.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        dx = e.clientX - sx;
+        card.style.transform = 'translateX(' + dx + 'px)';
+      });
+      function endDrag() {
+        if (!dragging) return;
+        dragging = false;
+        card.style.transition = 'transform 0.18s ease';
+        if (Math.abs(dx) > 80) {
+          card.style.transform = 'translateX(' + (dx > 0 ? 420 : -420) + 'px)';
+          setTimeout(function () {
+            nextTopic();
+            card.style.transition = 'none';
+            card.style.transform = '';
+            requestAnimationFrame(function () { card.style.transition = 'transform 0.18s ease'; });
+          }, 160);
+        } else {
+          card.style.transform = '';
+        }
+      }
+      card.addEventListener('pointerup', endDrag);
+      card.addEventListener('pointercancel', endDrag);
+      card.addEventListener('pointerleave', endDrag);
+    }
+
+    // ── Onboarding ─────────────────────────────────────────────────────────
+    var draftName = '';
+    var draftAge = null;
+
+    function chipGrid(container, selected, onPick) {
+      container.innerHTML = '';
+      for (var a = 3; a <= 16; a++) {
+        (function (age) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'chip' + (selected === age ? ' on' : '');
+          b.textContent = String(age);
+          b.setAttribute('aria-pressed', selected === age ? 'true' : 'false');
+          b.addEventListener('click', function () { onPick(age); });
+          container.appendChild(b);
+        })(a);
+      }
+    }
+
+    function renderOnboard() {
+      $('ob-step1').hidden = false;
+      $('ob-step2').hidden = true;
+      $('ob-btn1').disabled = $('ob-name').value.trim().length === 0;
+    }
+    function renderOnboardStep2() {
+      $('ob-step1').hidden = true;
+      $('ob-step2').hidden = false;
+      chipGrid($('ob-age-grid'), draftAge, function (age) {
+        draftAge = age;
+        renderOnboardStep2();
+      });
+      $('ob-btn2').disabled = !(draftName && draftAge);
+    }
+
+    function wireOnboard() {
+      $('ob-name').addEventListener('input', function () {
+        $('ob-btn1').disabled = this.value.trim().length === 0;
+      });
+      $('ob-btn1').addEventListener('click', function () {
+        draftName = $('ob-name').value.trim();
+        renderOnboardStep2();
+      });
+      $('ob-back').addEventListener('click', function () {
+        $('ob-step1').hidden = false;
+        $('ob-step2').hidden = true;
+      });
+      $('ob-btn2').addEventListener('click', function () {
+        if (!(draftName && draftAge)) return;
+        $('ob-btn2').disabled = true;
+        api('/api/profile', { method: 'PUT', body: { child_name: draftName, child_age: draftAge, reminder_time: null } })
+          .then(loadState, function () {
+            $('ob-btn2').disabled = false;
+            toast('Impossible d’enregistrer, réessaie.');
+          });
+      });
+    }
+
+    // ── Profile sheet ──────────────────────────────────────────────────────
+    var sheetReminderOn = false;
+    var sheetAge = null;
+
+    function openSheet() {
+      var p = state.profile;
+      if (!p) return;
+      $('sh-name').value = p.child_name;
+      sheetAge = p.child_age;
+      renderSheetChips();
+      sheetReminderOn = !!p.reminder_time;
+      $('sh-reminder').classList.toggle('on', sheetReminderOn);
+      $('sh-reminder').setAttribute('aria-checked', sheetReminderOn ? 'true' : 'false');
+      $('sh-time').value = p.reminder_time || '19:00';
+      $('sh-time-row').hidden = !sheetReminderOn;
+      $('sheet').hidden = false;
+      $('sheet-backdrop').hidden = false;
+    }
+    function renderSheetChips() {
+      chipGrid($('sh-age-grid'), sheetAge, function (age) {
+        sheetAge = age;
+        renderSheetChips();
+      });
+    }
+    function closeSheet() {
+      $('sheet').hidden = true;
+      $('sheet-backdrop').hidden = true;
+    }
+    function saveSheet() {
+      var name = $('sh-name').value.trim();
+      if (name.length < 1) { toast('Le prénom est vide.'); return; }
+      if (sheetAge == null) { toast('Choisissez un âge.'); return; }
+      var reminder = sheetReminderOn ? ($('sh-time').value || '19:00') : null;
+      $('sh-save').disabled = true;
+      api('/api/profile', { method: 'PUT', body: { child_name: name, child_age: sheetAge, reminder_time: reminder } })
+        .then(function () { closeSheet(); return loadStateSilent(); }, function () {
+          toast('Impossible d’enregistrer, réessaie.');
+        })
+        .then(function () { $('sh-save').disabled = false; });
+    }
+
+    // ── Wiring ─────────────────────────────────────────────────────────────
+    function pressable(id, handler) {
+      var el = $(id);
+      el.addEventListener('click', handler);
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(); }
+      });
+    }
+
+    function wire() {
+      wireOnboard();
+      wireSwipe();
+      pressable('talk-btn', toggleTalk);
+      pressable('fav-btn', toggleFav);
+      pressable('next-btn', nextTopic);
+      pressable('back-link', backToToday);
+      pressable('hi', openSheet);
+      pressable('tab-today', function () { setTab('today'); });
+      pressable('tab-favoris', function () { setTab('favoris'); });
+      pressable('fav-empty-back', function () { setTab('today'); });
+      pressable('retry-btn', loadState);
+      $('sh-cancel').addEventListener('click', closeSheet);
+      $('sh-save').addEventListener('click', saveSheet);
+      $('sheet-backdrop').addEventListener('click', closeSheet);
+      $('sh-reminder').addEventListener('click', function () {
+        sheetReminderOn = !sheetReminderOn;
+        this.classList.toggle('on', sheetReminderOn);
+        this.setAttribute('aria-checked', sheetReminderOn ? 'true' : 'false');
+        $('sh-time-row').hidden = !sheetReminderOn;
+      });
+      if (location.hash === '#favoris') tab = 'favoris';
+    }
+
+    wire();
+    loadState();
+  })();
+  </script>
 </body>
 </html>
