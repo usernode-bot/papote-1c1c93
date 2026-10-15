@@ -1,0 +1,88 @@
+/* The screens the spec drew, carried over by the platform before the first
+   version was built (screen 1 is public/index.html's main screen; screen 2,
+   if any, its <template data-spec-screen="2">). Colours are the design kit's
+   tokens, rgb(var(--accent)), so they follow the light and the dark look. */
+
+/* Each screen is one centred column: the phone width it was drawn at grows
+   to a readable column on a wider window, never rows and buttons stretched
+   across the window. Remove this only for an app that fills the window by
+   design, such as a map. */
+[data-spec-screen] {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.app {
+  background: rgb(var(--ground));
+  color: rgb(var(--fg));
+  min-height: 900px;
+  width: 390px;
+  box-sizing: border-box;
+  font-family: ui-rounded,system-ui,-apple-system,sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  padding: 0 20px;
+  position: relative;
+}
+
+.app * {box-sizing:border-box;margin:0}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 56px 0 16px;
+}
+
+.hi {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.title {font-size:28px;line-height:36px;font-weight:700}
+
+.streak {display:flex;align-items:center;gap:6px;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:999px;padding:8px 12px;font-weight:600;font-size:14px;line-height:20px;min-height:44px}
+
+.streak svg {color:rgb(var(--accent))}
+
+.days {display:flex;gap:8px;margin-bottom:16px}
+
+.d {flex:1;text-align:center;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.d i {display:block;height:8px;border-radius:4px;background:rgb(var(--line));margin-bottom:4px}
+
+.d.on i {background:rgb(var(--accent))}
+
+.card {background:rgb(var(--surface));border:1px solid rgb(var(--line));border-radius:24px;padding:20px;box-shadow:0 0 0 6px rgb(var(--raised));position:relative}
+
+.meta {display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+
+.badge {background:rgb(var(--accent));color:rgb(var(--on-accent));border-radius:999px;padding:2px 12px;font-size:14px;line-height:20px;font-weight:600}
+
+.theme {font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.q {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weight:700;margin-bottom:20px}
+
+.section-label {font-size:14px;line-height:20px;font-weight:500;color:rgb(var(--muted));margin-bottom:8px}
+
+.r {display:flex;gap:10px;padding:12px 0;border-top:1px solid rgb(var(--line))}
+
+.r svg {flex:none;margin-top:2px;color:rgb(var(--accent))}
+
+.tip {background:rgb(var(--sage));color:rgb(var(--sage-fg));border-radius:14px;padding:12px 14px;margin-top:12px;font-size:14px;line-height:20px}
+
+.tip b {display:block;font-weight:600}
+
+.acts {display:flex;gap:10px;margin-top:16px}
+
+.btn-primary {flex:1;min-height:48px;border-radius:12px;background:rgb(var(--accent));color:rgb(var(--on-accent));font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;border:0;font-size:16px}
+
+.btn-secondary {width:48px;min-height:48px;border-radius:12px;background:rgb(var(--surface));border:1px solid rgb(var(--line));color:rgb(var(--fg));display:flex;align-items:center;justify-content:center}
+
+.hint {text-align:center;font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:12px}
+
+.tabs {position:absolute;left:0;right:0;top:836px;height:64px;background:rgb(var(--surface));border-top:1px solid rgb(var(--line));display:flex}
+
+.tabs div {flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;line-height:20px;color:rgb(var(--muted))}
+
+.tabs .a {color:rgb(var(--accent));font-weight:600}
+
+svg {stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
