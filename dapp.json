@@ -1,6 +1,7 @@
 {
   "description": "Un sujet de discussion parent-enfant chaque jour",
   "icon": {
+    "image": "brand/icon.png",
     "emoji": "💬"
   },
   "secrets": [],
