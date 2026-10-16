@@ -126,3 +126,10 @@ Re-theme by changing the token values there, keeping every text pair at
   for everyone. Passing a topic is not saved.
 - One child per account. Content stays within the platform's content
   rules — nothing mature, violent or about self-harm, in any age band.
+- **Language:** the app speaks French or English, chosen for the viewer
+  (platform locale, else the phone's, French as the fallback — no picker
+  in the app). UI strings live in the `STRINGS` table in
+  `public/index.html` (`fr` and `en`). Topics come from `public/topics.js`
+  (the French source and the stream of record) and `public/topics.en.js`
+  (same ids, same order, same bands); `server.js` throws at boot if the
+  English file drifts. Topic ids are French slugs and are never shown.
