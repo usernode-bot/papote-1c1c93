@@ -244,6 +244,32 @@ function streakFrom(daysSet, today) {
 
 const TOPIC_IDS = new Set(PAPOTE_TOPICS.topics.map((t) => t.id));
 
+// The English twin file must mirror topics.js exactly (same topics, same
+// order, same ids, every band complete): the topic of the day is one shared
+// stream and the client falls back to French only if a band is missing. A
+// mismatch fails at boot, so a broken translation can never deploy.
+const PAPOTE_TOPICS_EN = require('./public/topics.en.js');
+(function validateEnTopics() {
+  const fr = PAPOTE_TOPICS.topics;
+  const en = PAPOTE_TOPICS_EN.topics;
+  if (!Array.isArray(en) || en.length !== fr.length) {
+    throw new Error('topics.en.js: expected ' + fr.length + ' topics in the same order');
+  }
+  for (let i = 0; i < fr.length; i += 1) {
+    if (en[i].id !== fr[i].id) {
+      throw new Error('topics.en.js: topic ' + i + ' has id "' + en[i].id + '", expected "' + fr[i].id + '"');
+    }
+    for (const band of ['3-5', '6-9', '10-12', '13-16']) {
+      const v = en[i][band];
+      if (!v || typeof v.q !== 'string' || !v.q.trim()
+        || !Array.isArray(v.followups) || v.followups.length !== 2 || v.followups.some((f) => typeof f !== 'string' || !f.trim())
+        || typeof v.tip !== 'string' || !v.tip.trim()) {
+        throw new Error('topics.en.js: topic "' + en[i].id + '" band "' + band + '" is missing q, two followups or a tip');
+      }
+    }
+  }
+})();
+
 // ── Routes ────────────────────────────────────────────────────────────────
 
 function requireUser(req, res) {

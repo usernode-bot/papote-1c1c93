@@ -125,7 +125,7 @@
         <div class="meta"><span class="skeleton" style="display:inline-block;width:64px;height:20px;border-radius:999px"></span><span class="skeleton" style="display:inline-block;width:70px;height:14px"></span></div>
         <span class="skeleton" style="display:block;width:100%;height:22px;margin:4px 0 10px"></span>
         <span class="skeleton" style="display:block;width:80%;height:22px;margin-bottom:20px"></span>
-        <div class="section-label">Pour relancer</div>
+        <div class="section-label" data-i18n="followupsLabel">Pour relancer</div>
         <span class="skeleton" style="display:block;width:90%;height:16px;margin:12px 0"></span>
         <span class="skeleton" style="display:block;width:70%;height:16px;margin-bottom:16px"></span>
         <span class="skeleton" style="display:block;width:100%;height:64px;border-radius:14px"></span>
@@ -135,80 +135,80 @@
 
     <!-- Error: what failed, what still works, one Retry -->
     <div id="error-state" class="state-error" hidden>
-      <div class="err-title">Impossible de charger le sujet du&nbsp;jour</div>
-      <p class="state-msg">Vos favoris et votre série sont conservés.</p>
-      <button id="retry-btn" class="btn-primary">Réessayer</button>
+      <div class="err-title" data-i18n="errTitle">Impossible de charger le sujet du&nbsp;jour</div>
+      <p class="state-msg" data-i18n="errMsg">Vos favoris et votre série sont conservés.</p>
+      <button id="retry-btn" class="btn-primary" data-i18n="retry">Réessayer</button>
     </div>
 
     <!-- Onboarding, two steps -->
     <section id="onboard" hidden>
       <div class="ob">
         <div id="ob-step1">
-          <div class="ob-step-label">Étape 1 sur 2</div>
-          <div class="title">Bienvenue dans Papote</div>
-          <p class="ob-sub">Un sujet de discussion à deux, chaque jour, adapté à l'âge de votre enfant.</p>
-          <label class="field-label" for="ob-name">Prénom de votre enfant</label>
-          <input id="ob-name" class="field" type="text" maxlength="40" autocomplete="off" placeholder="par ex. Léa">
-          <button id="ob-btn1" class="btn-primary" disabled>Continuer</button>
+          <div class="ob-step-label" data-i18n="obStep1">Étape 1 sur 2</div>
+          <div class="title" data-i18n="obWelcomeTitle">Bienvenue dans Papote</div>
+          <p class="ob-sub" data-i18n="obWelcomeSub">Un sujet de discussion à deux, chaque jour, adapté à l'âge de votre enfant.</p>
+          <label class="field-label" for="ob-name" data-i18n="nameLabel">Prénom de votre enfant</label>
+          <input id="ob-name" class="field" type="text" maxlength="40" autocomplete="off" placeholder="par ex. Léa" data-i18n-placeholder="namePlaceholder">
+          <button id="ob-btn1" class="btn-primary" disabled data-i18n="continue">Continuer</button>
         </div>
         <div id="ob-step2" hidden>
-          <div class="ob-step-label">Étape 2 sur 2</div>
-          <div class="title">Son âge</div>
-          <p class="ob-sub">Les sujets s'adaptent à la tranche d'âge.</p>
+          <div class="ob-step-label" data-i18n="obStep2">Étape 2 sur 2</div>
+          <div class="title" data-i18n="ageTitle">Son âge</div>
+          <p class="ob-sub" data-i18n="ageSub">Les sujets s'adaptent à la tranche d'âge.</p>
           <div class="chip-grid" id="ob-age-grid"></div>
-          <button id="ob-btn2" class="btn-primary" disabled>Continuer</button>
-          <button id="ob-back" class="back-link">Retour</button>
+          <button id="ob-btn2" class="btn-primary" disabled data-i18n="continue">Continuer</button>
+          <button id="ob-back" class="back-link" data-i18n="back">Retour</button>
         </div>
       </div>
     </section>
 
     <!-- Main: today's card, drawn by the spec -->
     <section id="main-view" hidden>
-    <div class="top"><div><div class="hi" id="hi" role="button" tabindex="0" aria-label="Ouvrir le profil"></div><div class="title" id="title"></div></div>
+    <div class="top"><div><div class="hi" id="hi" role="button" tabindex="0" aria-label="Ouvrir le profil" data-i18n-aria="openProfile"></div><div class="title" id="title"></div></div>
     <div class="streak"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z"/></svg><span id="streak-count"></span></div></div>
-    <div class="days" id="days-row"><div class="d"><i></i>L</div><div class="d"><i></i>M</div><div class="d"><i></i>M</div><div class="d"><i></i>J</div><div class="d"><i></i>V</div><div class="d"><i></i>S</div><div class="d"><i></i>D</div></div>
-    <button id="back-link" class="back-link" hidden>Revenir au sujet du jour</button>
+    <div class="days" id="days-row"><div class="d"><i></i><span>L</span></div><div class="d"><i></i><span>M</span></div><div class="d"><i></i><span>M</span></div><div class="d"><i></i><span>J</span></div><div class="d"><i></i><span>V</span></div><div class="d"><i></i><span>S</span></div><div class="d"><i></i><span>D</span></div></div>
+    <button id="back-link" class="back-link" hidden data-i18n="backToToday">Revenir au sujet du jour</button>
     <div id="reminder-line" class="reminder-line" hidden></div>
     <div class="card" id="card">
     <div class="meta"><span class="badge" id="badge"></span><span class="theme" id="theme"></span></div>
     <div class="q" id="question"></div>
-    <div class="section-label">Pour relancer</div>
+    <div class="section-label" data-i18n="followupsLabel">Pour relancer</div>
     <div class="r"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span id="fu1"></span></div>
     <div class="r"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span id="fu2"></span></div>
-    <div class="tip"><b>Conseil pour vous</b><span id="tip-text"></span></div>
+    <div class="tip"><b data-i18n="tipLabel">Conseil pour vous</b><span id="tip-text"></span></div>
     </div>
-    <div class="acts" id="acts"><div class="btn-secondary" id="fav-btn" role="button" tabindex="0" aria-label="Ajouter aux favoris" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path id="heart-path" d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg></div><button class="btn-primary" id="talk-btn"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span id="talk-label">On en a parlé</span></button><div class="btn-secondary" id="next-btn" role="button" tabindex="0" aria-label="Sujet suivant"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M13 5l7 7-7 7"/></svg></div></div>
-    <div class="hint" id="swipe-hint">Glissez la carte pour passer au sujet suivant</div>
+    <div class="acts" id="acts"><div class="btn-secondary" id="fav-btn" role="button" tabindex="0" aria-label="Ajouter aux favoris" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path id="heart-path" d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg></div><button class="btn-primary" id="talk-btn"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span id="talk-label">On en a parlé</span></button><div class="btn-secondary" id="next-btn" role="button" tabindex="0" aria-label="Sujet suivant" data-i18n-aria="nextTopic"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M13 5l7 7-7 7"/></svg></div></div>
+    <div class="hint" id="swipe-hint" data-i18n="swipeHint">Glissez la carte pour passer au sujet suivant</div>
 
     <!-- Favoris tab -->
     <div id="favoris-view" hidden>
       <ul class="list" id="favoris-list"></ul>
       <div id="favoris-empty" class="state-empty" hidden>
-        <div class="err-title">Aucun favori pour l'instant</div>
-        <p class="state-msg">Mettez de côté les sujets qui vous plaisent avec le cœur.</p>
-        <button id="fav-empty-back" class="btn-primary">Voir le sujet du jour</button>
+        <div class="err-title" data-i18n="favEmptyTitle">Aucun favori pour l'instant</div>
+        <p class="state-msg" data-i18n="favEmptyMsg">Mettez de côté les sujets qui vous plaisent avec le cœur.</p>
+        <button id="fav-empty-back" class="btn-primary" data-i18n="seeToday">Voir le sujet du jour</button>
       </div>
     </div>
     </section>
 
-    <div class="tabs" id="tabs"><div class="a" id="tab-today" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Aujourd'hui</div><div id="tab-favoris" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg><span>Favoris · <span id="fav-count"></span></span></div></div>
+    <div class="tabs" id="tabs"><div class="a" id="tab-today" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span data-i18n="tabToday">Aujourd'hui</span></div><div id="tab-favoris" role="button" tabindex="0"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg><span><span data-i18n="tabFavoris">Favoris</span> · <span id="fav-count"></span></span></div></div>
     </div>
   </div>
 
   <!-- Profile sheet -->
   <div id="sheet-backdrop" class="sheet-backdrop" hidden></div>
-  <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Profil" hidden>
-    <div class="sheet-head"><button id="sh-cancel" class="sheet-link">Annuler</button><div class="sheet-title">Profil</div><button id="sh-save" class="sheet-link">Enregistrer</button></div>
-    <label class="field-label" for="sh-name">Prénom de votre enfant</label>
+  <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Profil" data-i18n-aria="profile" hidden>
+    <div class="sheet-head"><button id="sh-cancel" class="sheet-link" data-i18n="cancel">Annuler</button><div class="sheet-title" data-i18n="profile">Profil</div><button id="sh-save" class="sheet-link" data-i18n="save">Enregistrer</button></div>
+    <label class="field-label" for="sh-name" data-i18n="nameLabel">Prénom de votre enfant</label>
     <input id="sh-name" class="field" type="text" maxlength="40" autocomplete="off">
-    <div class="field-label">Son âge</div>
+    <div class="field-label" data-i18n="ageTitle">Son âge</div>
     <div class="chip-grid" id="sh-age-grid"></div>
     <div class="sheet-row">
-      <span class="sheet-row-label">Rappel quotidien</span>
-      <button id="sh-reminder" class="switch" role="switch" aria-checked="false" aria-label="Rappel quotidien"></button>
+      <span class="sheet-row-label" data-i18n="reminderLabel">Rappel quotidien</span>
+      <button id="sh-reminder" class="switch" role="switch" aria-checked="false" aria-label="Rappel quotidien" data-i18n-aria="reminderLabel"></button>
     </div>
     <div id="sh-time-row" hidden>
-      <label class="field-label" for="sh-time">Heure du rappel</label>
+      <label class="field-label" for="sh-time" data-i18n="reminderTime">Heure du rappel</label>
       <input id="sh-time" class="field" type="time" value="19:00">
     </div>
   </div>
@@ -216,11 +216,178 @@
   <div id="toast" class="toast" hidden></div>
 
   <script src="/topics.js"></script>
+  <script src="/topics.en.js"></script>
   <script>
   (function () {
     'use strict';
 
-    var TOPICS = window.PAPOTE_TOPICS.topics;
+    // ── Language: the phone's language, French unless the phone says English.
+    // The platform locale (when someone has picked one in Homeroom) wins over
+    // the phone's; anything else falls back to French. No server round-trip:
+    // the language is never sent or stored.
+    var STRINGS = {
+      fr: {
+        week: ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
+        streak: function (n) { return n + (n === 1 ? ' jour' : ' jours'); },
+        forChild: function (name, age) { return 'Papote · pour ' + name + ', ' + age + ' ans'; },
+        band: function (b) { return b + ' ans'; },
+        reminderLine: function (name) { return 'C’est l’heure de papoter avec ' + name; },
+        titleToday: 'Sujet du jour',
+        titleOther: 'Un autre sujet',
+        titleFavoris: 'Favoris',
+        tabToday: 'Aujourd\'hui',
+        tabFavoris: 'Favoris',
+        followupsLabel: 'Pour relancer',
+        tipLabel: 'Conseil pour vous',
+        talk: 'On en a parlé',
+        talkDone: 'Vous en avez parlé',
+        swipeHint: 'Glissez la carte pour passer au sujet suivant',
+        backToToday: 'Revenir au sujet du jour',
+        errTitle: 'Impossible de charger le sujet du jour',
+        errMsg: 'Vos favoris et votre série sont conservés.',
+        retry: 'Réessayer',
+        favEmptyTitle: 'Aucun favori pour l\'instant',
+        favEmptyMsg: 'Mettez de côté les sujets qui vous plaisent avec le cœur.',
+        seeToday: 'Voir le sujet du jour',
+        obStep1: 'Étape 1 sur 2',
+        obStep2: 'Étape 2 sur 2',
+        obWelcomeTitle: 'Bienvenue dans Papote',
+        obWelcomeSub: 'Un sujet de discussion à deux, chaque jour, adapté à l\'âge de votre enfant.',
+        nameLabel: 'Prénom de votre enfant',
+        namePlaceholder: 'par ex. Léa',
+        ageTitle: 'Son âge',
+        ageSub: 'Les sujets s\'adaptent à la tranche d\'âge.',
+        continue: 'Continuer',
+        back: 'Retour',
+        profile: 'Profil',
+        cancel: 'Annuler',
+        save: 'Enregistrer',
+        reminderLabel: 'Rappel quotidien',
+        reminderTime: 'Heure du rappel',
+        toastSaveErr: 'Impossible d’enregistrer, réessaie.',
+        toastNameEmpty: 'Le prénom est vide.',
+        toastChooseAge: 'Choisissez un âge.',
+        openProfile: 'Ouvrir le profil',
+        addFav: 'Ajouter aux favoris',
+        removeFav: 'Retirer des favoris',
+        nextTopic: 'Sujet suivant',
+      },
+      en: {
+        week: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+        streak: function (n) { return n + (n === 1 ? ' day' : ' days'); },
+        forChild: function (name, age) { return 'Papote · for ' + name + ', age ' + age; },
+        band: function (b) { return 'Ages ' + b; },
+        reminderLine: function (name) { return 'Time for a chat with ' + name; },
+        titleToday: 'Today\'s topic',
+        titleOther: 'Another topic',
+        titleFavoris: 'Favourites',
+        tabToday: 'Today',
+        tabFavoris: 'Favourites',
+        followupsLabel: 'To keep it going',
+        tipLabel: 'A tip for you',
+        talk: 'We talked about it',
+        talkDone: 'You talked about it',
+        swipeHint: 'Swipe the card for the next topic',
+        backToToday: 'Back to today\'s topic',
+        errTitle: 'Couldn\'t load today\'s topic',
+        errMsg: 'Your favourites and your streak are safe.',
+        retry: 'Retry',
+        favEmptyTitle: 'No favourites yet',
+        favEmptyMsg: 'Keep the topics you like with the heart.',
+        seeToday: 'See today\'s topic',
+        obStep1: 'Step 1 of 2',
+        obStep2: 'Step 2 of 2',
+        obWelcomeTitle: 'Welcome to Papote',
+        obWelcomeSub: 'One topic to talk about together, every day, suited to your child\'s age.',
+        nameLabel: 'Your child\'s first name',
+        namePlaceholder: 'e.g. Emma',
+        ageTitle: 'Their age',
+        ageSub: 'Topics adapt to their age band.',
+        continue: 'Continue',
+        back: 'Back',
+        profile: 'Profile',
+        cancel: 'Cancel',
+        save: 'Save',
+        reminderLabel: 'Daily reminder',
+        reminderTime: 'Reminder time',
+        toastSaveErr: 'Couldn\'t save. Please try again.',
+        toastNameEmpty: 'The first name is empty.',
+        toastChooseAge: 'Choose an age.',
+        openProfile: 'Open profile',
+        addFav: 'Add to favourites',
+        removeFav: 'Remove from favourites',
+        nextTopic: 'Next topic',
+      },
+    };
+
+    function pickLang(tag) {
+      tag = (tag || '').toLowerCase();
+      return tag.indexOf('en') === 0 ? 'en' : 'fr';
+    }
+
+    var TOPICS_FR = window.PAPOTE_TOPICS.topics;
+    var LANG = pickLang((navigator.languages && navigator.languages[0]) || navigator.language);
+    var TOPICS = (LANG === 'en' && window.PAPOTE_TOPICS_EN) ? window.PAPOTE_TOPICS_EN.topics : TOPICS_FR;
+
+    function t(key) {
+      var table = STRINGS[LANG] || STRINGS.fr;
+      var v = table[key];
+      return v != null ? v : STRINGS.fr[key];
+    }
+    // The English twin of a French topic; null when the id is missing.
+    function topicEn(id) {
+      var en = (window.PAPOTE_TOPICS_EN && window.PAPOTE_TOPICS_EN.topics) || [];
+      for (var i = 0; i < en.length; i++) if (en[i].id === id) return en[i];
+      return null;
+    }
+    // A band's text, falling back to the French topic when the English one
+    // is missing the id or the band.
+    function topicText(topic, band) {
+      if (LANG === 'en') {
+        var en = topicEn(topic.id);
+        var v = en && en[band];
+        if (v && typeof v.q === 'string' && v.followups && v.followups.length === 2 && typeof v.tip === 'string') return v;
+      }
+      return topic[band];
+    }
+    function topicTheme(topic) {
+      if (LANG === 'en') {
+        var en = topicEn(topic.id);
+        if (en && en.theme) return en.theme;
+      }
+      return topic.theme;
+    }
+    function topicById(id) {
+      for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i].id === id) return TOPICS[i];
+      for (var j = 0; j < TOPICS_FR.length; j++) if (TOPICS_FR[j].id === id) return TOPICS_FR[j];
+      return null;
+    }
+
+    // Fills the static markup with the chosen language's strings. The French
+    // text stays in the markup as the default; this runs before loadState(),
+    // so the skeleton and every state paint in the right language from the
+    // start.
+    function applyStaticStrings() {
+      var els = document.querySelectorAll('[data-i18n]');
+      for (var i = 0; i < els.length; i++) els[i].textContent = t(els[i].getAttribute('data-i18n'));
+      els = document.querySelectorAll('[data-i18n-placeholder]');
+      for (var j = 0; j < els.length; j++) els[j].setAttribute('placeholder', t(els[j].getAttribute('data-i18n-placeholder')));
+      els = document.querySelectorAll('[data-i18n-aria]');
+      for (var k = 0; k < els.length; k++) els[k].setAttribute('aria-label', t(els[k].getAttribute('data-i18n-aria')));
+      var cells = $('days-row').children;
+      var wk = t('week');
+      for (var d = 0; d < cells.length && d < wk.length; d++) cells[d].lastElementChild.textContent = wk[d];
+      document.documentElement.lang = LANG;
+    }
+
+    function setLang(l) {
+      if (l === LANG) return;
+      LANG = l;
+      TOPICS = (l === 'en' && window.PAPOTE_TOPICS_EN) ? window.PAPOTE_TOPICS_EN.topics : TOPICS_FR;
+      applyStaticStrings();
+      if (state) render();
+    }
+
     var DAY = localDay();
     var IS_DEMO = new URLSearchParams(location.search).get('demo') === '1';
     var TOKEN = new URLSearchParams(location.search).get('token') || '';
@@ -322,7 +489,8 @@
     // ── Rendering ──────────────────────────────────────────────────────────
     function currentTopic() {
       if (openedId) {
-        for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i].id === openedId) return TOPICS[i];
+        var found = topicById(openedId);
+        if (found) return found;
         openedId = null;
       }
       var age = state && state.profile ? state.profile.child_age : 7;
@@ -339,8 +507,8 @@
       var isGuest = !!state.guest;
 
       // Header
-      $('hi').textContent = p ? ('Papote · pour ' + p.child_name + ', ' + p.child_age + ' ans') : 'Papote';
-      $('streak-count').textContent = state.streak + (state.streak === 1 ? ' jour' : ' jours');
+      $('hi').textContent = p ? t('forChild')(p.child_name, p.child_age) : 'Papote';
+      $('streak-count').textContent = t('streak')(state.streak);
 
       // Week row
       var cells = $('days-row').children;
@@ -354,7 +522,7 @@
       $('favoris-view').hidden = tab !== 'favoris';
       var todayBits = $('main-view').querySelectorAll('#days-row, #card, #acts, #swipe-hint, #back-link, #reminder-line');
       for (var j = 0; j < todayBits.length; j++) todayBits[j].style.display = tab === 'today' ? '' : 'none';
-      $('title').textContent = tab === 'favoris' ? 'Favoris' : (offset > 0 || openedId ? 'Un autre sujet' : 'Sujet du jour');
+      $('title').textContent = tab === 'favoris' ? t('titleFavoris') : (offset > 0 || openedId ? t('titleOther') : t('titleToday'));
       $('fav-count').textContent = state.favorites.length;
 
       if (tab === 'favoris') { renderFavoris(); return; }
@@ -364,12 +532,12 @@
     function renderCard() {
       var topic = currentTopic();
       var band = currentBand();
-      var v = topic[band];
+      var v = topicText(topic, band);
       var p = state.profile;
       var isGuest = !!state.guest;
 
-      $('badge').textContent = band + ' ans';
-      $('theme').textContent = topic.theme;
+      $('badge').textContent = t('band')(band);
+      $('theme').textContent = topicTheme(topic);
       $('question').textContent = v.q;
       $('fu1').textContent = v.followups[0];
       $('fu2').textContent = v.followups[1];
@@ -380,7 +548,7 @@
       // Reminder line (in-app daily reminder)
       var due = p && p.reminder_time && state.talkedToday.length === 0 && reminderDue(p.reminder_time);
       $('reminder-line').hidden = !due;
-      if (due) $('reminder-line').textContent = 'C’est l’heure de papoter avec ' + p.child_name;
+      if (due) $('reminder-line').textContent = t('reminderLine')(p.child_name);
 
       // Actions
       $('acts').style.display = isGuest ? 'none' : '';
@@ -388,10 +556,10 @@
       var faved = isFaved(topic.id);
       $('heart-path').style.fill = faved ? 'currentColor' : 'none';
       $('fav-btn').setAttribute('aria-pressed', faved ? 'true' : 'false');
-      $('fav-btn').setAttribute('aria-label', faved ? 'Retirer des favoris' : 'Ajouter aux favoris');
+      $('fav-btn').setAttribute('aria-label', faved ? t('removeFav') : t('addFav'));
       var talked = state.talkedToday.indexOf(topic.id) !== -1;
       $('talk-btn').classList.toggle('done', talked);
-      $('talk-label').textContent = talked ? 'Vous en avez parlé' : 'On en a parlé';
+      $('talk-label').textContent = talked ? t('talkDone') : t('talk');
     }
 
     function reminderDue(time) {
@@ -413,16 +581,15 @@
       list.innerHTML = '';
       var band = currentBand();
       for (var i = 0; i < favs.length; i++) {
-        var topic = null;
-        for (var k = 0; k < TOPICS.length; k++) if (TOPICS[k].id === favs[i].topic_id) topic = TOPICS[k];
+        var topic = topicById(favs[i].topic_id);
         if (!topic) continue;
         var li = document.createElement('li');
         li.className = 'list-row fav-row';
         li.setAttribute('role', 'button');
         li.setAttribute('tabindex', '0');
-        li.innerHTML = '<span class="badge">' + esc(topic[band] ? band : '6-9') + ' ans</span>' +
-          '<span class="fav-theme">' + esc(topic.theme) + '</span>' +
-          '<span class="fav-q">' + esc(topic[band].q) + '</span>';
+        li.innerHTML = '<span class="badge">' + esc(t('band')(topic[band] ? band : '6-9')) + '</span>' +
+          '<span class="fav-theme">' + esc(topicTheme(topic)) + '</span>' +
+          '<span class="fav-q">' + esc(topicText(topic, band).q) + '</span>';
         li.addEventListener('click', function (id) { return function () { openFavorite(id); }; }(topic.id));
         li.addEventListener('keydown', function (id) { return function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFavorite(id); } }; }(topic.id));
         list.appendChild(li);
@@ -457,7 +624,7 @@
         if (had) state.talkedToday.push(topic.id);
         else state.talkedToday = state.talkedToday.filter(function (t) { return t !== topic.id; });
         renderCard();
-        toast('Impossible d’enregistrer, réessaie.');
+        toast(t('toastSaveErr'));
       });
     }
 
@@ -477,7 +644,7 @@
         if (had) state.favorites.push({ topic_id: topic.id, created_at: new Date().toISOString() });
         else state.favorites = state.favorites.filter(function (f) { return f.topic_id !== topic.id; });
         render();
-        toast('Impossible d’enregistrer, réessaie.');
+        toast(t('toastSaveErr'));
       });
     }
 
@@ -590,7 +757,7 @@
         api('/api/profile', { method: 'PUT', body: { child_name: draftName, child_age: draftAge, reminder_time: null } })
           .then(loadState, function () {
             $('ob-btn2').disabled = false;
-            toast('Impossible d’enregistrer, réessaie.');
+            toast(t('toastSaveErr'));
           });
       });
     }
@@ -625,13 +792,13 @@
     }
     function saveSheet() {
       var name = $('sh-name').value.trim();
-      if (name.length < 1) { toast('Le prénom est vide.'); return; }
-      if (sheetAge == null) { toast('Choisissez un âge.'); return; }
+      if (name.length < 1) { toast(t('toastNameEmpty')); return; }
+      if (sheetAge == null) { toast(t('toastChooseAge')); return; }
       var reminder = sheetReminderOn ? ($('sh-time').value || '19:00') : null;
       $('sh-save').disabled = true;
       api('/api/profile', { method: 'PUT', body: { child_name: name, child_age: sheetAge, reminder_time: reminder } })
         .then(function () { closeSheet(); return loadStateSilent(); }, function () {
-          toast('Impossible d’enregistrer, réessaie.');
+          toast(t('toastSaveErr'));
         })
         .then(function () { $('sh-save').disabled = false; });
     }
@@ -670,7 +837,21 @@
     }
 
     wire();
+    // Static strings before loadState(): the skeleton and every state paint
+    // in the chosen language from the start.
+    applyStaticStrings();
     loadState();
+    // The platform locale, when someone has picked one in Homeroom, wins
+    // over the phone's language. Guarded: it can be absent outside the shell.
+    if (window.usernode && typeof window.usernode.getUserLocale === 'function') {
+      window.usernode.getUserLocale().then(function (r) {
+        if (r && r.locale) setLang(pickLang(r.locale));
+      }).catch(function () {});
+    }
+    window.addEventListener('usernode:locale-changed', function (e) {
+      var tag = (e.detail && e.detail.locale) || (navigator.languages && navigator.languages[0]) || navigator.language;
+      setLang(pickLang(tag));
+    });
   })();
   </script>
 </body>

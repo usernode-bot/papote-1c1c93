@@ -12,20 +12,20 @@
     {
       "name": "Onboarding",
       "path": "/",
-      "expectText": "Prénom de votre enfant"
+      "expectSelector": "#ob-name"
     },
     {
       "name": "Today populated (visual, impact public/**)",
       "id": "today-populated",
       "path": "/?demo=1",
-      "expectText": "On en a parlé",
+      "expectSelector": "#main-view:not([hidden]) #talk-btn",
       "visual": true,
       "impact": ["public/**"]
     },
     {
       "name": "Favourites",
       "path": "/?demo=1#favoris",
-      "expectText": "Favoris"
+      "expectSelector": "#favoris-view:not([hidden])"
     }
   ]
 }
