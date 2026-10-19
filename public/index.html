@@ -227,9 +227,11 @@
   <!-- Profile sheet -->
   <div id="sheet-backdrop" class="sheet-backdrop" hidden></div>
   <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Profil" data-i18n-aria="profile" hidden>
-    <div class="sheet-head"><button id="sh-cancel" class="sheet-link" data-i18n="cancel">Annuler</button><div class="sheet-title" data-i18n="profile">Profil</div><button id="sh-save" class="sheet-link" data-i18n="save">Enregistrer</button></div>
+    <div class="sheet-head"><button id="sh-cancel" class="sheet-link" data-i18n="cancel">Annuler</button><div class="sheet-title" id="sh-title">Profil</div><button id="sh-save" class="sheet-link" data-i18n="save">Enregistrer</button></div>
+    <div class="field-label" id="sh-children-label" data-i18n="childrenLabel">Vos enfants</div>
+    <div class="chip-grid" id="sh-children"></div>
     <label class="field-label" for="sh-name" data-i18n="nameLabel">Prénom de votre enfant</label>
-    <input id="sh-name" class="field" type="text" maxlength="40" autocomplete="off">
+    <input id="sh-name" class="field" type="text" maxlength="40" autocomplete="off" placeholder="par ex. Léa" data-i18n-placeholder="namePlaceholder">
     <div class="field-label" data-i18n="ageTitle">Son âge</div>
     <div class="chip-grid" id="sh-age-grid"></div>
     <div class="sheet-row">
@@ -295,6 +297,10 @@
         save: 'Enregistrer',
         reminderLabel: 'Rappel quotidien',
         reminderTime: 'Heure du rappel',
+        childrenLabel: 'Vos enfants',
+        addChild: 'Ajouter',
+        newChild: 'Nouvel enfant',
+        toastTooMany: 'Cinq enfants au maximum.',
         toastSaveErr: 'Impossible d’enregistrer, réessaie.',
         toastNameEmpty: 'Le prénom est vide.',
         toastChooseAge: 'Choisissez un âge.',
@@ -349,6 +355,10 @@
         save: 'Save',
         reminderLabel: 'Daily reminder',
         reminderTime: 'Reminder time',
+        childrenLabel: 'Your children',
+        addChild: 'Add',
+        newChild: 'New child',
+        toastTooMany: 'Five children at most.',
         toastSaveErr: 'Couldn\'t save. Please try again.',
         toastNameEmpty: 'The first name is empty.',
         toastChooseAge: 'Choose an age.',
@@ -876,7 +886,7 @@
       $('ob-btn2').addEventListener('click', function () {
         if (!(draftName && draftAge)) return;
         $('ob-btn2').disabled = true;
-        api('/api/profile', { method: 'PUT', body: { child_name: draftName, child_age: draftAge, reminder_time: null } })
+        api('/api/children', { method: 'POST', body: { child_name: draftName, child_age: draftAge, reminder_time: null } })
           .then(loadState, function () {
             $('ob-btn2').disabled = false;
             toast(t('toastSaveErr'));
@@ -887,20 +897,78 @@
     // ── Profile sheet ──────────────────────────────────────────────────────
     var sheetReminderOn = false;
     var sheetAge = null;
+    var sheetMode = 'edit'; // 'edit' the chosen child, or 'add' a new one
 
     function openSheet() {
-      var p = state.profile;
-      if (!p) return;
-      $('sh-name').value = p.child_name;
-      sheetAge = p.child_age;
-      renderSheetChips();
-      sheetReminderOn = !!p.reminder_time;
-      $('sh-reminder').classList.toggle('on', sheetReminderOn);
-      $('sh-reminder').setAttribute('aria-checked', sheetReminderOn ? 'true' : 'false');
-      $('sh-time').value = p.reminder_time || '19:00';
-      $('sh-time-row').hidden = !sheetReminderOn;
+      if (!state.profile) return;
+      sheetMode = 'edit';
+      fillSheet();
       $('sheet').hidden = false;
       $('sheet-backdrop').hidden = false;
+    }
+    // The sheet in its current mode: the chosen child's fields in edit mode,
+    // an empty first name and no age in add mode.
+    function fillSheet() {
+      var p = state.profile;
+      var adding = sheetMode === 'add';
+      $('sh-title').textContent = adding ? t('newChild') : t('profile');
+      $('sh-name').value = adding || !p ? '' : p.child_name;
+      sheetAge = adding || !p ? null : p.child_age;
+      renderSheetChips();
+      sheetReminderOn = adding || !p ? false : !!p.reminder_time;
+      $('sh-reminder').classList.toggle('on', sheetReminderOn);
+      $('sh-reminder').setAttribute('aria-checked', sheetReminderOn ? 'true' : 'false');
+      $('sh-time').value = (p && p.reminder_time) || '19:00';
+      $('sh-time-row').hidden = !sheetReminderOn;
+      renderSheetChildren();
+    }
+    // One chip per child, the chosen one filled in, then « Ajouter » unless
+    // the account already has five.
+    function renderSheetChildren() {
+      var box = $('sh-children');
+      var kids = state.children || [];
+      var adding = sheetMode === 'add';
+      box.innerHTML = '';
+      for (var i = 0; i < kids.length; i++) {
+        (function (kid) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          var on = !adding && state.profile && kid.id === state.profile.id;
+          b.className = 'chip name' + (on ? ' on' : '');
+          b.textContent = kid.child_name;
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          b.addEventListener('click', function () { pickChild(kid.id); });
+          box.appendChild(b);
+        })(kids[i]);
+      }
+      if (kids.length < 5) {
+        var add = document.createElement('button');
+        add.type = 'button';
+        add.className = 'chip name' + (adding ? ' on' : '');
+        add.textContent = t('addChild');
+        add.setAttribute('aria-pressed', adding ? 'true' : 'false');
+        add.addEventListener('click', function () { sheetMode = 'add'; fillSheet(); });
+        box.appendChild(add);
+      }
+    }
+    function setChildrenDisabled(on) {
+      var btns = $('sh-children').querySelectorAll('button');
+      for (var i = 0; i < btns.length; i++) btns[i].disabled = on;
+    }
+    // Switching child is saved at once; anything typed for the previous
+    // child is dropped. The card behind is reworded in loadStateSilent().
+    function pickChild(id) {
+      if (sheetMode === 'edit' && state.profile && state.profile.id === id) return;
+      setChildrenDisabled(true);
+      api('/api/children/' + encodeURIComponent(id) + '/choose', { method: 'POST' })
+        .then(function () {
+          sheetMode = 'edit';
+          return loadStateSilent();
+        })
+        .then(fillSheet, function () {
+          setChildrenDisabled(false);
+          toast(t('toastSaveErr'));
+        });
     }
     function renderSheetChips() {
       chipGrid($('sh-age-grid'), sheetAge, function (age) {
@@ -917,12 +985,16 @@
       if (name.length < 1) { toast(t('toastNameEmpty')); return; }
       if (sheetAge == null) { toast(t('toastChooseAge')); return; }
       var reminder = sheetReminderOn ? ($('sh-time').value || '19:00') : null;
+      var body = { child_name: name, child_age: sheetAge, reminder_time: reminder };
+      var req = sheetMode === 'add'
+        ? api('/api/children', { method: 'POST', body: body })
+        : (state.profile
+          ? api('/api/children/' + encodeURIComponent(state.profile.id), { method: 'PUT', body: body })
+          : Promise.reject(new Error('no chosen child')));
       $('sh-save').disabled = true;
-      api('/api/profile', { method: 'PUT', body: { child_name: name, child_age: sheetAge, reminder_time: reminder } })
-        .then(function () { closeSheet(); return loadStateSilent(); }, function () {
-          toast(t('toastSaveErr'));
-        })
-        .then(function () { $('sh-save').disabled = false; });
+      req.then(function () { closeSheet(); return loadStateSilent(); }, function (err) {
+        toast(err && err.status === 409 ? t('toastTooMany') : t('toastSaveErr'));
+      }).then(function () { $('sh-save').disabled = false; });
     }
 
     // ── Wiring ─────────────────────────────────────────────────────────────

@@ -135,7 +135,8 @@ Re-theme by changing the token values there, keeping every text pair at
   streak. The English twin lives in `public/words.en.js` (same ids, same
   order, same kinds, no `pic`: the client takes it from the French entry);
   `server.js` throws at boot if either file drifts.
-- One child per account. Content stays within the platform's content
+- Up to five children per account, one of them chosen; the streak, talks
+  and favourites are the family's (keyed on the user). Content stays within the platform's content
   rules — nothing mature, violent or about self-harm, in any age band.
 - **Language:** the app speaks French or English, chosen for the viewer
   (platform locale, else the phone's, French as the fallback — no picker

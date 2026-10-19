@@ -141,6 +141,10 @@ svg {stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-
 
 .chip.on {background:rgb(var(--accent));border-color:rgb(var(--accent));color:rgb(var(--on-accent))}
 
+.chip.name {padding:0 16px}
+
+#sh-children {margin-bottom:16px}
+
 .sheet-backdrop {position:fixed;inset:0;background:rgb(var(--fg) / 0.4);z-index:40}
 
 .sheet {position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:390px;max-width:100%;background:rgb(var(--surface));border:1px solid rgb(var(--line));border-bottom:0;border-radius:24px 24px 0 0;padding:12px 20px calc(20px + env(safe-area-inset-bottom, 0px));z-index:41;max-height:85vh;overflow:auto}

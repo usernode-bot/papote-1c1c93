@@ -169,10 +169,12 @@ const PAPOTE_WORDS = require('./public/words.js');
 async function applySchema() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS papote_profiles (
-      user_id text PRIMARY KEY,
+      id bigserial PRIMARY KEY,
+      user_id text NOT NULL,
       child_name text NOT NULL CHECK (char_length(child_name) BETWEEN 1 AND 40),
       child_age int NOT NULL CHECK (child_age BETWEEN 3 AND 16),
       reminder_time text CHECK (reminder_time IS NULL OR reminder_time ~ '^[0-2][0-9]:[0-5][0-9]$'),
+      chosen boolean NOT NULL DEFAULT false,
       is_demo boolean NOT NULL DEFAULT false,
       created_at timestamptz NOT NULL DEFAULT now()
     );
@@ -191,6 +193,24 @@ async function applySchema() {
       created_at timestamptz NOT NULL DEFAULT now(),
       PRIMARY KEY (user_id, topic_id)
     );
+  `);
+  // Upgrade of the first version's one-row-per-user table: give each row an
+  // id, keep the existing child as the chosen one, and move the primary key
+  // from user_id to id. Every statement is idempotent.
+  await pool.query(`
+    ALTER TABLE papote_profiles ADD COLUMN IF NOT EXISTS id bigserial;
+    ALTER TABLE papote_profiles ADD COLUMN IF NOT EXISTS chosen boolean NOT NULL DEFAULT false;
+    DO $$ BEGIN
+      IF EXISTS (SELECT 1 FROM pg_index i
+                 JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
+                 WHERE i.indrelid = 'papote_profiles'::regclass AND i.indisprimary AND a.attname = 'user_id') THEN
+        UPDATE papote_profiles SET chosen = true;
+        ALTER TABLE papote_profiles DROP CONSTRAINT papote_profiles_pkey;
+        ALTER TABLE papote_profiles ADD PRIMARY KEY (id);
+      END IF;
+    END $$;
+    CREATE INDEX IF NOT EXISTS papote_profiles_user ON papote_profiles (user_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS papote_profiles_one_chosen ON papote_profiles (user_id) WHERE chosen;
   `);
   await pool.query("COMMENT ON TABLE papote_profiles IS 'staging:private'");
   await pool.query("COMMENT ON TABLE papote_talks IS 'staging:private'");
@@ -362,6 +382,7 @@ app.get('/api/state', async (req, res) => {
       // personal data of anyone's.
       return res.json({
         profile: null,
+        children: [],
         guest: true,
         streak: 0,
         week: weekOf(day).map((d) => ({ date: d, talked: false })),
@@ -379,14 +400,17 @@ app.get('/api/state', async (req, res) => {
       // not ask for them, so a plain route still shows a real (or empty)
       // state even on a database where the demo wrote.
       const demoFilter = demo ? '' : ' AND is_demo = false';
-      const profileR = await client.query(`SELECT child_name, child_age, reminder_time FROM papote_profiles WHERE user_id = $1${demoFilter}`, [userId]);
+      const profilesR = await client.query(`SELECT id::text AS id, child_name, child_age, reminder_time, chosen FROM papote_profiles WHERE user_id = $1${demoFilter} ORDER BY created_at, id`, [userId]);
       const talksR = await client.query(`SELECT day::text AS day, topic_id FROM papote_talks WHERE user_id = $1${demoFilter}`, [userId]);
       const favsR = await client.query(`SELECT topic_id, created_at FROM papote_favorites WHERE user_id = $1${demoFilter} ORDER BY created_at`, [userId]);
       await client.query('COMMIT');
-      const p = profileR.rows[0];
+      // The chosen child, else the first one: on a plain view the chosen row
+      // may be a demo one and is left out of this answer.
+      const p = profilesR.rows.find((r) => r.chosen) || profilesR.rows[0] || null;
       const daysSet = new Set(talksR.rows.map((r) => r.day));
       return res.json({
-        profile: p ? { child_name: p.child_name, child_age: p.child_age, reminder_time: p.reminder_time } : null,
+        profile: p ? { id: p.id, child_name: p.child_name, child_age: p.child_age, reminder_time: p.reminder_time } : null,
+        children: profilesR.rows.map((r) => ({ id: r.id, child_name: r.child_name, child_age: r.child_age })),
         guest: false,
         streak: streakFrom(daysSet, day),
         week: weekOf(day).map((d) => ({ date: d, talked: daysSet.has(d) })),
@@ -402,34 +426,114 @@ app.get('/api/state', async (req, res) => {
   }
 });
 
-app.put('/api/profile', async (req, res) => {
-  if (!requireUser(req, res)) return;
-  const { child_name, child_age, reminder_time } = req.body || {};
+// Body of a child create/edit, validated. Returns { error } or the values.
+function parseChild(body) {
+  const { child_name, child_age, reminder_time } = body || {};
   if (typeof child_name !== 'string' || child_name.trim().length < 1 || child_name.trim().length > 40) {
-    return res.status(400).json({ error: 'invalid_name' });
+    return { error: 'invalid_name' };
   }
   const age = Number(child_age);
   if (!Number.isInteger(age) || age < 3 || age > 16) {
-    return res.status(400).json({ error: 'invalid_age' });
+    return { error: 'invalid_age' };
   }
   let reminder = null;
   if (reminder_time != null) {
     if (typeof reminder_time !== 'string' || !/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(reminder_time)) {
-      return res.status(400).json({ error: 'invalid_reminder_time' });
+      return { error: 'invalid_reminder_time' };
     }
     reminder = reminder_time;
   }
+  return { child_name: child_name.trim(), child_age: age, reminder_time: reminder };
+}
+
+const MAX_CHILDREN = 5;
+const CHILD_ID = /^\d+$/;
+
+// Serialises child writes for one user inside a transaction. An advisory
+// lock keyed on the user id is what covers the empty case too: `SELECT ...
+// FOR UPDATE` locks nothing when there is no row yet, and two requests
+// racing on a fresh account would both insert a chosen child.
+async function lockChildren(client, userId) {
+  await client.query("SELECT pg_advisory_xact_lock(hashtext('papote_children:' || $1))", [userId]);
+}
+
+app.post('/api/children', async (req, res) => {
+  if (!requireUser(req, res)) return;
+  const child = parseChild(req.body);
+  if (child.error) return res.status(400).json({ error: child.error });
+  const userId = req.user.id;
+  const client = await pool.connect();
   try {
-    await pool.query(
-      `INSERT INTO papote_profiles (user_id, child_name, child_age, reminder_time)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (user_id) DO UPDATE SET child_name = $2, child_age = $3, reminder_time = $4, is_demo = false`,
-      [req.user.id, child_name.trim(), age, reminder]
+    await client.query('BEGIN');
+    // Two tabs adding at once are serialised here, so the cap holds.
+    await lockChildren(client, userId);
+    await client.query('SELECT 1 FROM papote_profiles WHERE user_id = $1 FOR UPDATE', [userId]);
+    const countR = await client.query('SELECT count(*)::int AS n FROM papote_profiles WHERE user_id = $1 AND is_demo = false', [userId]);
+    if (countR.rows[0].n >= MAX_CHILDREN) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({ error: 'too_many_children' });
+    }
+    // Moving the chosen flag is two statements: the unique index is checked
+    // row by row.
+    await client.query('UPDATE papote_profiles SET chosen = false WHERE user_id = $1 AND chosen', [userId]);
+    const insR = await client.query(
+      `INSERT INTO papote_profiles (user_id, child_name, child_age, reminder_time, chosen)
+       VALUES ($1, $2, $3, $4, true) RETURNING id::text AS id`,
+      [userId, child.child_name, child.child_age, child.reminder_time]
     );
+    await client.query('COMMIT');
+    return res.json({ ok: true, id: insR.rows[0].id });
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('POST /api/children failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  } finally {
+    client.release();
+  }
+});
+
+app.put('/api/children/:id', async (req, res) => {
+  if (!requireUser(req, res)) return;
+  if (!CHILD_ID.test(req.params.id)) return res.status(404).json({ error: 'unknown_child' });
+  const child = parseChild(req.body);
+  if (child.error) return res.status(400).json({ error: child.error });
+  try {
+    const r = await pool.query(
+      `UPDATE papote_profiles SET child_name = $1, child_age = $2, reminder_time = $3, is_demo = false
+       WHERE id = $4 AND user_id = $5 RETURNING id`,
+      [child.child_name, child.child_age, child.reminder_time, req.params.id, req.user.id]
+    );
+    if (r.rowCount === 0) return res.status(404).json({ error: 'unknown_child' });
     return res.json({ ok: true });
   } catch (err) {
-    console.error('PUT /api/profile failed: ' + err.message);
+    console.error('PUT /api/children failed: ' + err.message);
     return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+app.post('/api/children/:id/choose', async (req, res) => {
+  if (!requireUser(req, res)) return;
+  if (!CHILD_ID.test(req.params.id)) return res.status(404).json({ error: 'unknown_child' });
+  const userId = req.user.id;
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await lockChildren(client, userId);
+    const owned = await client.query('SELECT 1 FROM papote_profiles WHERE id = $1 AND user_id = $2', [req.params.id, userId]);
+    if (owned.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'unknown_child' });
+    }
+    await client.query('UPDATE papote_profiles SET chosen = false WHERE user_id = $1 AND chosen', [userId]);
+    await client.query('UPDATE papote_profiles SET chosen = true WHERE id = $1 AND user_id = $2', [req.params.id, userId]);
+    await client.query('COMMIT');
+    return res.json({ ok: true });
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error('POST /api/children/:id/choose failed: ' + err.message);
+    return res.status(500).json({ error: 'server_error' });
+  } finally {
+    client.release();
   }
 });
 
@@ -494,17 +598,19 @@ app.delete('/api/favorites/:topic_id', async (req, res) => {
 
 // ── Staging demo ──────────────────────────────────────────────────────────
 // `?demo=1` on staging, first /api/state of a viewer with no profile: write
-// Léa's profile, a 12-day streak and 8 favourites, in one transaction, all
-// ON CONFLICT DO NOTHING so it is idempotent. Rows are demo data for the
-// viewer themself (this app's first version, per the platform's demo rule).
+// two children (Léa chosen, Tom), a 12-day family streak and 8 favourites, in
+// one transaction. Rows are demo data for the viewer themself (this app's
+// first version, per the platform's demo rule).
 async function writeDemo(client, userId, today) {
   const startedAt = Date.now();
-  // Only when the viewer has no profile at all (demo or real).
-  const existing = await client.query('SELECT user_id FROM papote_profiles WHERE user_id = $1', [userId]);
+  // Only when the viewer has no profile at all (demo or real). The lock stops
+  // two first requests of the same viewer from writing it twice.
+  await lockChildren(client, userId);
+  const existing = await client.query('SELECT 1 FROM papote_profiles WHERE user_id = $1', [userId]);
   if (existing.rows.length > 0) return;
   await client.query(
-    `INSERT INTO papote_profiles (user_id, child_name, child_age, reminder_time, is_demo)
-     VALUES ($1, 'Léa', 7, '19:00', true) ON CONFLICT (user_id) DO NOTHING`,
+    `INSERT INTO papote_profiles (user_id, child_name, child_age, reminder_time, chosen, is_demo)
+     VALUES ($1, 'Léa', 7, '19:00', true, true), ($1, 'Tom', 12, NULL, false, true)`,
     [userId]
   );
   // Talks on each of the 12 days before today: a 12-day streak, today free.
