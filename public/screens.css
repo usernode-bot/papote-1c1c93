@@ -34,8 +34,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 56px 0 16px;
+  padding: 4px 0 16px;
 }
+
+/* The FR / EN switch: two quiet pills in the empty band above the greeting.
+   Together with .top's 4px they keep the header's 56px top space. */
+.lang {display:flex;justify-content:flex-end;gap:6px;padding-top:8px}
+
+.lang-opt {min-width:44px;min-height:44px;border-radius:999px;border:0;background:rgb(var(--raised));color:rgb(var(--fg));font:inherit;font-size:14px;line-height:20px;font-weight:600;padding:0 12px;cursor:pointer}
+
+.lang-opt.on {background:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+.lang-opt:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
+
+/* The loading skeleton has no switch to hold that band, so it keeps the
+   header's original 56px. */
+#loading .top {padding-top:56px}
 
 .hi {font-size:14px;line-height:20px;color:rgb(var(--muted))}
 

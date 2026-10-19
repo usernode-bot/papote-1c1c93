@@ -142,9 +142,11 @@ Re-theme by changing the token values there, keeping every text pair at
   the user, never on the child. Content stays within the platform's
   content rules — nothing mature, violent or about self-harm, in any age
   band.
-- **Language:** the app speaks French or English, chosen for the viewer
-  (platform locale, else the phone's, French as the fallback — no picker
-  in the app). UI strings live in the `STRINGS` table in
+- **Language:** the app speaks French or English. A FR / EN switch at the
+  top of the main screen sets it; the choice stays on the phone
+  (`localStorage`, `papote_lang`) and wins over the platform locale and
+  the phone's language. Until a pill is tapped, the platform locale wins
+  over the phone's, with French as the fallback. UI strings live in the `STRINGS` table in
   `public/index.html` (`fr` and `en`). Topics come from `public/topics.js`
   (the French source and the stream of record) and `public/topics.en.js`
   (same ids, same order, same bands); `server.js` throws at boot if the

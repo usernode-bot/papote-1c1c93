@@ -31,6 +31,11 @@
       "name": "Favourites",
       "path": "/?demo=1#favoris",
       "expectSelector": "#favoris-view:not([hidden])"
+    },
+    {
+      "name": "Language switch",
+      "path": "/?demo=1",
+      "expectSelector": "#main-view:not([hidden]) .lang[role=group] .lang-opt[aria-pressed=\"true\"]"
     }
   ]
 }
