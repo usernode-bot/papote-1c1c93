@@ -114,9 +114,10 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-- **All three tables are `staging:private`** (`papote_profiles`,
-  `papote_talks`, `papote_favorites`): they hold personal data (a child's
-  name and age, habits). Never drop the `COMMENT ON TABLE` lines.
+- **All four tables are `staging:private`** (`papote_profiles`,
+  `papote_children`, `papote_talks`, `papote_favorites`): they hold
+  personal data (a child's name and age, habits). Never drop the
+  `COMMENT ON TABLE` lines.
 - **Demo rows carry `is_demo = true`** and stay out of every `/api/state`
   answer that is not opened with `?demo=1`, so a plain route still shows
   its real state on a database where the demo wrote.
@@ -135,8 +136,12 @@ Re-theme by changing the token values there, keeping every text pair at
   streak. The English twin lives in `public/words.en.js` (same ids, same
   order, same kinds, no `pic`: the client takes it from the French entry);
   `server.js` throws at boot if either file drifts.
-- One child per account. Content stays within the platform's content
-  rules — nothing mature, violent or about self-harm, in any age band.
+- Up to five children per account (`papote_children`; the profile row
+  keeps a `chosen_child_id` pointer). The card follows the chosen child;
+  the streak, the talks and the favourites are the family's — keyed on
+  the user, never on the child. Content stays within the platform's
+  content rules — nothing mature, violent or about self-harm, in any age
+  band.
 - **Language:** the app speaks French or English, chosen for the viewer
   (platform locale, else the phone's, French as the fallback — no picker
   in the app). UI strings live in the `STRINGS` table in
