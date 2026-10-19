@@ -23,6 +23,11 @@
       "impact": ["public/**"]
     },
     {
+      "name": "Word of the day",
+      "path": "/?demo=1",
+      "expectSelector": "#main-view:not([hidden]) #word-section:not([hidden]) #word-text"
+    },
+    {
       "name": "Favourites",
       "path": "/?demo=1#favoris",
       "expectSelector": "#favoris-view:not([hidden])"

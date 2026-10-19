@@ -165,6 +165,26 @@ svg {stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-
 
 .toast {position:fixed;bottom:calc(80px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);max-width:90%;background:rgb(var(--fg));color:rgb(var(--ground));border-radius:999px;padding:8px 16px;font-size:14px;line-height:20px;z-index:50;text-align:center}
 
+/* ── Word of the day card ──────────────────────────────────────────────── */
+
+.word-head {font-size:18px;line-height:26px;font-weight:700;margin:36px 0 14px}
+
+.word-top {display:flex;align-items:center;gap:14px;margin-bottom:12px}
+
+.word-pic {flex:none;width:64px;height:64px;border-radius:16px;background:rgb(var(--raised));color:rgb(var(--accent));display:flex;align-items:center;justify-content:center}
+
+.word-pic svg {flex:none}
+
+.word {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weight:700}
+
+.word-def {margin-bottom:20px}
+
+.pills {display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+
+.pill {background:rgb(var(--raised));color:rgb(var(--fg));border-radius:999px;padding:4px 12px;font-size:14px;line-height:20px}
+
+.word-ex {font-family:ui-serif,Georgia,serif;font-style:italic;font-size:18px;line-height:28px;border-left:3px solid rgb(var(--line));padding-left:12px;margin-bottom:20px}
+
 @media (prefers-reduced-motion: reduce) {
   .switch, .switch::after, .card, .btn-primary {transition:none !important}
 }

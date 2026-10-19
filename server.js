@@ -159,6 +159,10 @@ app.get('/favicon.ico', (_req, res) => res.status(204).end());
 // to check that a topic id in a request actually exists.
 const PAPOTE_TOPICS = require('./public/topics.js');
 
+// The word of the day lives in the same hand-written library the client
+// renders; the server only loads it to check the file's shape at boot.
+const PAPOTE_WORDS = require('./public/words.js');
+
 // ── Schema (applied idempotently on boot) ─────────────────────────────────
 // Every table is personal data (names, ages, habits), so all three are
 // marked `staging:private`: the schema is copied to staging, never the rows.
@@ -265,6 +269,76 @@ const PAPOTE_TOPICS_EN = require('./public/topics.en.js');
         || !Array.isArray(v.followups) || v.followups.length !== 2 || v.followups.some((f) => typeof f !== 'string' || !f.trim())
         || typeof v.tip !== 'string' || !v.tip.trim()) {
         throw new Error('topics.en.js: topic "' + en[i].id + '" band "' + band + '" is missing q, two followups or a tip');
+      }
+    }
+  }
+})();
+
+// The English twin file must mirror words.js exactly (same words, same
+// order, same ids and kinds, every band complete): the word of the day is
+// one shared stream and the client falls back to French only if a band is
+// missing. A mismatch fails at boot, so a broken translation can never
+// deploy.
+const PAPOTE_WORDS_EN = require('./public/words.en.js');
+(function validateWords() {
+  const fr = PAPOTE_WORDS.words;
+  if (!Array.isArray(fr) || fr.length !== 30) {
+    throw new Error('words.js: expected 30 words, found ' + (fr ? fr.length : typeof fr));
+  }
+  const seen = new Set();
+  for (let i = 0; i < fr.length; i += 1) {
+    const w = fr[i];
+    if (!w || typeof w.id !== 'string' || !w.id.trim()) {
+      throw new Error('words.js: word ' + i + ' has no id');
+    }
+    if (seen.has(w.id)) throw new Error('words.js: duplicate id "' + w.id + '"');
+    seen.add(w.id);
+    if (w.kind !== 'verb' && w.kind !== 'noun' && w.kind !== 'adj') {
+      throw new Error('words.js: word "' + w.id + '" has kind "' + w.kind + '", expected verb, noun or adj');
+    }
+    if (typeof w.word !== 'string' || !w.word.trim()) {
+      throw new Error('words.js: word "' + w.id + '" has no word');
+    }
+    if (!Array.isArray(w.pic) || w.pic.length < 1 || w.pic.length > 4
+      || w.pic.some((p) => typeof p !== 'string' || !p.trim())) {
+      throw new Error('words.js: word "' + w.id + '" needs one to four pic paths');
+    }
+    for (const band of ['3-5', '6-9', '10-12', '13-16']) {
+      const v = w[band];
+      if (!v || typeof v.def !== 'string' || !v.def.trim()
+        || !Array.isArray(v.synonyms) || v.synonyms.length < 2 || v.synonyms.length > 3 || v.synonyms.some((s) => typeof s !== 'string' || !s.trim())
+        || typeof v.example !== 'string' || !v.example.trim()
+        || !Array.isArray(v.associations) || v.associations.length !== 3 || v.associations.some((s) => typeof s !== 'string' || !s.trim())
+        || typeof v.tip !== 'string' || !v.tip.trim()) {
+        throw new Error('words.js: word "' + w.id + '" band "' + band + '" is missing def, two or three synonyms, an example, three associations or a tip');
+      }
+    }
+  }
+})();
+(function validateEnWords() {
+  const fr = PAPOTE_WORDS.words;
+  const en = PAPOTE_WORDS_EN.words;
+  if (!Array.isArray(en) || en.length !== fr.length) {
+    throw new Error('words.en.js: expected ' + fr.length + ' words in the same order');
+  }
+  for (let i = 0; i < fr.length; i += 1) {
+    if (en[i].id !== fr[i].id) {
+      throw new Error('words.en.js: word ' + i + ' has id "' + en[i].id + '", expected "' + fr[i].id + '"');
+    }
+    if (en[i].kind !== fr[i].kind) {
+      throw new Error('words.en.js: word "' + en[i].id + '" has kind "' + en[i].kind + '", expected "' + fr[i].kind + '"');
+    }
+    if (typeof en[i].word !== 'string' || !en[i].word.trim()) {
+      throw new Error('words.en.js: word "' + en[i].id + '" has no word');
+    }
+    for (const band of ['3-5', '6-9', '10-12', '13-16']) {
+      const v = en[i][band];
+      if (!v || typeof v.def !== 'string' || !v.def.trim()
+        || !Array.isArray(v.synonyms) || v.synonyms.length < 2 || v.synonyms.length > 3 || v.synonyms.some((s) => typeof s !== 'string' || !s.trim())
+        || typeof v.example !== 'string' || !v.example.trim()
+        || !Array.isArray(v.associations) || v.associations.length !== 3 || v.associations.some((s) => typeof s !== 'string' || !s.trim())
+        || typeof v.tip !== 'string' || !v.tip.trim()) {
+        throw new Error('words.en.js: word "' + en[i].id + '" band "' + band + '" is missing def, two or three synonyms, an example, three associations or a tip');
       }
     }
   }
