@@ -79,7 +79,10 @@ follows it, and updates it when a request changes the look on purpose.
 - **Signature element:** the topic card drawn like a trading card — a thick
   raised rim (a 6px ring in `--raised`), an age badge in the corner, the
   question in a large serif, speech-bubble icons on the follow-ups. The
-  streak is a flame pill; the week is a row of seven bars.
+  streak is a flame pill; the week is a row of seven bars. Below it, the
+  word card is a second trading card in the same drawing: a small drawn
+  pictogram tile, the word in the same serif, small grey section labels,
+  and "Goes with" tags in the raised cream.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
   in `tailwind.config.js`. The card's question is set in the serif stack
   (`ui-serif`), everything else in the rounded system sans.
@@ -122,8 +125,14 @@ Re-theme by changing the token values there, keeping every text pair at
 - **Topics are never generated**: they come from `public/topics.js`, 30
   hand-written topics in four age-band versions. The server only checks
   topic ids against the same file.
+- **Words are never generated**: they come from `public/words.js` (French
+  source, with the SVG pictograms) and `public/words.en.js` (same ids, same
+  order, same kinds); `server.js` throws at boot if the English file drifts
+  or a word is incomplete. 30 words, four age bands each.
 - The topic of the day is `topics[daysSinceEpoch(day) % 30]`, one stream
-  for everyone. Passing a topic is not saved.
+  for everyone. Passing a topic is not saved. The word of the day is
+  `words[daysSinceEpoch(day) % 30]`; swiping or opening a favourite does
+  not change it, and nothing about it is saved.
 - One child per account. Content stays within the platform's content
   rules — nothing mature, violent or about self-harm, in any age band.
 - **Language:** the app speaks French or English, chosen for the viewer

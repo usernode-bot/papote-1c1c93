@@ -165,6 +165,27 @@ svg {stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-
 
 .toast {position:fixed;bottom:calc(80px + env(safe-area-inset-bottom, 0px));left:50%;transform:translateX(-50%);max-width:90%;background:rgb(var(--fg));color:rgb(var(--ground));border-radius:999px;padding:8px 16px;font-size:14px;line-height:20px;z-index:50;text-align:center}
 
+/* Word of the day: a second trading card, built from the card's own parts. */
+.word-title {font-size:20px;line-height:28px;font-weight:600;margin:32px 0 14px}
+
+.word-head {display:flex;align-items:center;gap:14px;margin-bottom:12px}
+
+.pic {flex:none;width:64px;height:64px;border-radius:16px;background:rgb(var(--raised));color:rgb(var(--accent));display:flex;align-items:center;justify-content:center}
+
+.word {font-family:ui-serif,Georgia,serif;font-size:28px;line-height:36px;font-weight:700;min-width:0;overflow-wrap:break-word}
+
+.def {font-size:16px;line-height:24px}
+
+.wsec {border-top:1px solid rgb(var(--line));padding-top:12px;margin-top:12px}
+
+.wsec .section-label {margin-bottom:4px}
+
+.ex {font-family:ui-serif,Georgia,serif;font-size:18px;line-height:28px}
+
+.links {display:flex;flex-wrap:wrap;gap:8px}
+
+.link {background:rgb(var(--raised));color:rgb(var(--fg));border-radius:999px;padding:4px 12px;font-size:14px;line-height:20px}
+
 @media (prefers-reduced-motion: reduce) {
   .switch, .switch::after, .card, .btn-primary {transition:none !important}
 }

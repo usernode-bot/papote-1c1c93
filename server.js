@@ -270,6 +270,72 @@ const PAPOTE_TOPICS_EN = require('./public/topics.en.js');
   }
 })();
 
+// ── Words ─────────────────────────────────────────────────────────────────
+// The word of the day is picked in the page from these hand-written files,
+// like the topic. The server only checks them at boot: a broken word list or
+// a drifted English twin must never deploy.
+const PAPOTE_WORDS = require('./public/words.js');
+const PAPOTE_WORDS_EN = require('./public/words.en.js');
+(function validateWords() {
+  const fr = PAPOTE_WORDS.words;
+  if (!Array.isArray(fr) || fr.length !== 30) {
+    throw new Error('words.js: expected 30 words');
+  }
+  const KINDS = new Set(['verb', 'noun', 'adjective']);
+  const IDS = new Set();
+  const BANDS = ['3-5', '6-9', '10-12', '13-16'];
+  const PIC = /^[MmLlHhVvCcSsQqTtAaZz0-9 ,.\-]+$/;
+  const badBand = (w, band) => new Error('words.js: word "' + w.id + '" band "' + band
+    + '" is missing def, example, play, two or three synonyms, or three links');
+  for (const w of fr) {
+    if (!IDS.has(w.id)) IDS.add(w.id);
+    else throw new Error('words.js: duplicate id "' + w.id + '"');
+    if (!KINDS.has(w.kind)) throw new Error('words.js: word "' + w.id + '" has kind "' + w.kind + '"');
+    if (typeof w.word !== 'string' || !w.word.trim()) throw new Error('words.js: word "' + w.id + '" has no headword');
+    if (typeof w.pic !== 'string' || !PIC.test(w.pic)) throw new Error('words.js: word "' + w.id + '" has an invalid pic');
+    for (const band of BANDS) {
+      const v = w[band];
+      if (!v || typeof v.def !== 'string' || !v.def.trim()
+        || typeof v.example !== 'string' || !v.example.trim()
+        || typeof v.play !== 'string' || !v.play.trim()
+        || !Array.isArray(v.synonyms) || v.synonyms.length < 2 || v.synonyms.length > 3
+        || v.synonyms.some((s) => typeof s !== 'string' || !s.trim())
+        || !Array.isArray(v.links) || v.links.length !== 3
+        || v.links.some((s) => typeof s !== 'string' || !s.trim())) {
+        throw badBand(w, band);
+      }
+    }
+  }
+  const en = PAPOTE_WORDS_EN.words;
+  if (!Array.isArray(en) || en.length !== fr.length) {
+    throw new Error('words.en.js: expected ' + fr.length + ' words in the same order');
+  }
+  for (let i = 0; i < fr.length; i += 1) {
+    if (en[i].id !== fr[i].id) {
+      throw new Error('words.en.js: word ' + i + ' has id "' + en[i].id + '", expected "' + fr[i].id + '"');
+    }
+    if (en[i].kind !== fr[i].kind) {
+      throw new Error('words.en.js: word "' + en[i].id + '" has kind "' + en[i].kind + '", expected "' + fr[i].kind + '"');
+    }
+    if (typeof en[i].word !== 'string' || !en[i].word.trim()) {
+      throw new Error('words.en.js: word "' + en[i].id + '" has no headword');
+    }
+    for (const band of BANDS) {
+      const v = en[i][band];
+      if (!v || typeof v.def !== 'string' || !v.def.trim()
+        || typeof v.example !== 'string' || !v.example.trim()
+        || typeof v.play !== 'string' || !v.play.trim()
+        || !Array.isArray(v.synonyms) || v.synonyms.length < 2 || v.synonyms.length > 3
+        || v.synonyms.some((s) => typeof s !== 'string' || !s.trim())
+        || !Array.isArray(v.links) || v.links.length !== 3
+        || v.links.some((s) => typeof s !== 'string' || !s.trim())) {
+        throw new Error('words.en.js: word "' + en[i].id + '" band "' + band
+          + '" is missing def, example, play, two or three synonyms, or three links');
+      }
+    }
+  }
+})();
+
 // ── Routes ────────────────────────────────────────────────────────────────
 
 function requireUser(req, res) {

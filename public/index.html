@@ -131,6 +131,14 @@
         <span class="skeleton" style="display:block;width:100%;height:64px;border-radius:14px"></span>
       </div>
       <div class="acts"><span class="skeleton" style="width:48px;height:48px;border-radius:12px"></span><span class="skeleton" style="flex:1;height:48px;border-radius:12px"></span><span class="skeleton" style="width:48px;height:48px;border-radius:12px"></span></div>
+      <div class="word-title"><span class="skeleton" style="display:block;width:130px;height:20px"></span></div>
+      <div class="card">
+        <div class="meta"><span class="skeleton" style="display:inline-block;width:64px;height:20px;border-radius:999px"></span><span class="skeleton" style="display:inline-block;width:48px;height:14px"></span></div>
+        <div class="word-head"><span class="skeleton" style="display:block;width:64px;height:64px;border-radius:16px"></span><span class="skeleton" style="display:block;width:120px;height:28px"></span></div>
+        <span class="skeleton" style="display:block;width:100%;height:16px;margin-bottom:8px"></span>
+        <span class="skeleton" style="display:block;width:80%;height:16px;margin-bottom:16px"></span>
+        <span class="skeleton" style="display:block;width:60%;height:16px"></span>
+      </div>
     </div>
 
     <!-- Error: what failed, what still works, one Retry -->
@@ -180,6 +188,20 @@
     <div class="acts" id="acts"><div class="btn-secondary" id="fav-btn" role="button" tabindex="0" aria-label="Ajouter aux favoris" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path id="heart-path" d="M12 20s-8-5-8-10a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 5-8 10-8 10z"/></svg></div><button class="btn-primary" id="talk-btn"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg><span id="talk-label">On en a parlé</span></button><div class="btn-secondary" id="next-btn" role="button" tabindex="0" aria-label="Sujet suivant" data-i18n-aria="nextTopic"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M13 5l7 7-7 7"/></svg></div></div>
     <div class="hint" id="swipe-hint" data-i18n="swipeHint">Glissez la carte pour passer au sujet suivant</div>
 
+    <!-- Word of the day: a second card to read, nothing to tap on it -->
+    <div id="word-section">
+      <div class="word-title" data-i18n="wordTitle">Mot du jour</div>
+      <div class="card" id="word-card">
+        <div class="meta"><span class="badge" id="w-badge"></span><span class="theme" id="w-kind"></span></div>
+        <div class="word-head"><div class="pic"><svg width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><path id="w-pic"/></svg></div><div class="word" id="w-word"></div></div>
+        <p class="def" id="w-def"></p>
+        <div class="wsec"><div class="section-label" data-i18n="synonymsLabel">Synonymes</div><p id="w-syn"></p></div>
+        <div class="wsec"><div class="section-label" data-i18n="exampleLabel">Dans une phrase</div><p class="ex" id="w-ex"></p></div>
+        <div class="wsec"><div class="section-label" data-i18n="linksLabel">Ça va avec</div><div class="links" id="w-links"></div></div>
+        <div class="tip"><b data-i18n="playLabel">Pour le retenir</b><span id="w-play"></span></div>
+      </div>
+    </div>
+
     <!-- Favoris tab -->
     <div id="favoris-view" hidden>
       <ul class="list" id="favoris-list"></ul>
@@ -217,6 +239,8 @@
 
   <script src="/topics.js"></script>
   <script src="/topics.en.js"></script>
+  <script src="/words.js"></script>
+  <script src="/words.en.js"></script>
   <script>
   (function () {
     'use strict';
@@ -271,6 +295,15 @@
         addFav: 'Ajouter aux favoris',
         removeFav: 'Retirer des favoris',
         nextTopic: 'Sujet suivant',
+        wordTitle: 'Mot du jour',
+        kindVerb: 'Verbe',
+        kindNoun: 'Nom',
+        kindAdjective: 'Adjectif',
+        synonymsLabel: 'Synonymes',
+        exampleLabel: 'Dans une phrase',
+        linksLabel: 'Ça va avec',
+        playLabel: 'Pour le retenir',
+        quote: function (s) { return '« ' + s + ' »'; },
       },
       en: {
         week: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
@@ -317,6 +350,15 @@
         addFav: 'Add to favourites',
         removeFav: 'Remove from favourites',
         nextTopic: 'Next topic',
+        wordTitle: 'Word of the day',
+        kindVerb: 'Verb',
+        kindNoun: 'Noun',
+        kindAdjective: 'Adjective',
+        synonymsLabel: 'Synonyms',
+        exampleLabel: 'In a sentence',
+        linksLabel: 'Goes with',
+        playLabel: 'To remember it',
+        quote: function (s) { return '“' + s + '”'; },
       },
     };
 
@@ -361,6 +403,37 @@
       for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i].id === id) return TOPICS[i];
       for (var j = 0; j < TOPICS_FR.length; j++) if (TOPICS_FR[j].id === id) return TOPICS_FR[j];
       return null;
+    }
+
+    // ── Word of the day ────────────────────────────────────────────────────
+    // Hand-written words, one shared stream like the topics. The word does
+    // not follow the swipe or a favourite: it is always today's word.
+    var WORDS_FR = (window.PAPOTE_WORDS && window.PAPOTE_WORDS.words) || [];
+    var KIND_KEYS = { verb: 'kindVerb', noun: 'kindNoun', adjective: 'kindAdjective' };
+
+    function wordEn(id) {
+      var en = (window.PAPOTE_WORDS_EN && window.PAPOTE_WORDS_EN.words) || [];
+      for (var i = 0; i < en.length; i++) if (en[i].id === id) return en[i];
+      return null;
+    }
+    function wordOfDay() {
+      var n = WORDS_FR.length;
+      if (!n) return null;
+      var idx = ((daysSinceEpoch(DAY) % n) + n) % n;
+      return WORDS_FR[idx];
+    }
+    // The word's headword and band text: English when complete, else French.
+    function wordText(w, band) {
+      if (LANG === 'en') {
+        var en = wordEn(w.id);
+        var v = en && en[band];
+        if (v && typeof v.def === 'string' && Array.isArray(v.synonyms) && v.synonyms.length
+          && typeof v.example === 'string' && Array.isArray(v.links) && v.links.length
+          && typeof v.play === 'string') {
+          return { head: (en.word || w.word), band: v };
+        }
+      }
+      return { head: w.word, band: w[band] };
     }
 
     // Fills the static markup with the chosen language's strings. The French
@@ -520,7 +593,7 @@
       $('tab-today').classList.toggle('a', tab === 'today');
       $('tab-favoris').classList.toggle('a', tab === 'favoris');
       $('favoris-view').hidden = tab !== 'favoris';
-      var todayBits = $('main-view').querySelectorAll('#days-row, #card, #acts, #swipe-hint, #back-link, #reminder-line');
+      var todayBits = $('main-view').querySelectorAll('#days-row, #card, #acts, #swipe-hint, #back-link, #reminder-line, #word-section');
       for (var j = 0; j < todayBits.length; j++) todayBits[j].style.display = tab === 'today' ? '' : 'none';
       $('title').textContent = tab === 'favoris' ? t('titleFavoris') : (offset > 0 || openedId ? t('titleOther') : t('titleToday'));
       $('fav-count').textContent = state.favorites.length;
@@ -560,6 +633,33 @@
       var talked = state.talkedToday.indexOf(topic.id) !== -1;
       $('talk-btn').classList.toggle('done', talked);
       $('talk-label').textContent = talked ? t('talkDone') : t('talk');
+
+      renderWord();
+    }
+
+    function renderWord() {
+      var w = wordOfDay();
+      if (!w) return;
+      var band = currentBand();
+      var text = wordText(w, band);
+      var v = text.band;
+
+      $('w-badge').textContent = t('band')(band);
+      $('w-kind').textContent = t(KIND_KEYS[w.kind] || 'kindNoun');
+      $('w-word').textContent = text.head;
+      $('w-pic').setAttribute('d', w.pic);
+      $('w-def').textContent = v.def;
+      $('w-syn').textContent = v.synonyms.join(', ');
+      $('w-ex').textContent = t('quote')(v.example);
+      var links = $('w-links');
+      links.innerHTML = '';
+      for (var i = 0; i < v.links.length; i++) {
+        var tag = document.createElement('span');
+        tag.className = 'link';
+        tag.textContent = v.links[i];
+        links.appendChild(tag);
+      }
+      $('w-play').textContent = v.play;
     }
 
     function reminderDue(time) {
