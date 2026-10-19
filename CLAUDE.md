@@ -79,7 +79,11 @@ follows it, and updates it when a request changes the look on purpose.
 - **Signature element:** the topic card drawn like a trading card — a thick
   raised rim (a 6px ring in `--raised`), an age badge in the corner, the
   question in a large serif, speech-bubble icons on the follow-ups. The
-  streak is a flame pill; the week is a row of seven bars.
+  streak is a flame pill; the week is a row of seven bars. The word card
+  reuses that rim, badge, section labels and tip box, and adds the
+  pictogram square (a 64px rounded square in `--raised` with the drawing
+  in `--accent`) and the quiet pills (synonyms and associations in
+  `--raised`, not tappable).
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
   in `tailwind.config.js`. The card's question is set in the serif stack
   (`ui-serif`), everything else in the rounded system sans.
@@ -124,6 +128,13 @@ Re-theme by changing the token values there, keeping every text pair at
   topic ids against the same file.
 - The topic of the day is `topics[daysSinceEpoch(day) % 30]`, one stream
   for everyone. Passing a topic is not saved.
+- **Words are never generated**: they come from `public/words.js`, 30
+  hand-written words (verbs, nouns, adjectives) in the same four age bands.
+  The word of the day is `words[daysSinceEpoch(day) % 30]`, the same
+  stream as the topic, and it is never saved, faved or counted in the
+  streak. The English twin lives in `public/words.en.js` (same ids, same
+  order, same kinds, no `pic`: the client takes it from the French entry);
+  `server.js` throws at boot if either file drifts.
 - One child per account. Content stays within the platform's content
   rules — nothing mature, violent or about self-harm, in any age band.
 - **Language:** the app speaks French or English, chosen for the viewer
