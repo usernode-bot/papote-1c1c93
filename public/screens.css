@@ -34,8 +34,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 56px 0 16px;
+  padding: 4px 0 16px;
 }
+
+/* The FR / EN switch: a row above the greeting, the active pill filled in
+   the accent. 8 + 44 + 4 keeps the header the height it had before. */
+.lang {display:flex;justify-content:flex-end;gap:6px;padding-top:8px}
+
+.lang-opt {min-width:44px;min-height:44px;border-radius:999px;border:0;background:rgb(var(--raised));color:rgb(var(--fg));font:inherit;font-size:14px;line-height:20px;font-weight:600;padding:0 12px;cursor:pointer}
+
+.lang-opt.on {background:rgb(var(--accent));color:rgb(var(--on-accent))}
+
+.lang-opt:focus-visible {outline:2px solid rgb(var(--focus));outline-offset:2px}
 
 .hi {font-size:14px;line-height:20px;color:rgb(var(--muted))}
 
