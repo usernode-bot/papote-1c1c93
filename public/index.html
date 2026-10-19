@@ -173,6 +173,7 @@
 
     <!-- Main: today's card, drawn by the spec -->
     <section id="main-view" hidden>
+    <div class="lang" role="group" data-i18n-aria="langLabel" aria-label="Langue"><button class="lang-opt" type="button" data-lang="fr" lang="fr" aria-label="Français" aria-pressed="true">FR</button><button class="lang-opt" type="button" data-lang="en" lang="en" aria-label="English" aria-pressed="false">EN</button></div>
     <div class="top"><div><div class="hi" id="hi" role="button" tabindex="0" aria-label="Ouvrir le profil" data-i18n-aria="openProfile"></div><div class="title" id="title"></div></div>
     <div class="streak"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z"/></svg><span id="streak-count"></span></div></div>
     <div class="days" id="days-row"><div class="d"><i></i><span>L</span></div><div class="d"><i></i><span>M</span></div><div class="d"><i></i><span>M</span></div><div class="d"><i></i><span>J</span></div><div class="d"><i></i><span>V</span></div><div class="d"><i></i><span>S</span></div><div class="d"><i></i><span>D</span></div></div>
@@ -256,10 +257,11 @@
   (function () {
     'use strict';
 
-    // ── Language: the phone's language, French unless the phone says English.
-    // The platform locale (when someone has picked one in Homeroom) wins over
-    // the phone's; anything else falls back to French. No server round-trip:
-    // the language is never sent or stored.
+    // ── Language: a choice made with the FR / EN switch on the main screen
+    // first, kept in localStorage on this phone only. Without one, the
+    // platform locale (when someone has picked one in Homeroom) wins over
+    // the phone's language, and anything else falls back to French. No
+    // server round-trip: the language is never sent or stored on the account.
     var STRINGS = {
       fr: {
         week: ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
@@ -318,6 +320,7 @@
         exampleLabel: 'Dans une phrase',
         associationsLabel: 'Ça fait penser à',
         wordTipLabel: 'À essayer ensemble',
+        langLabel: 'Langue',
       },
       en: {
         week: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
@@ -376,6 +379,7 @@
         exampleLabel: 'In a sentence',
         associationsLabel: 'It goes with',
         wordTipLabel: 'Try it together',
+        langLabel: 'Language',
       },
     };
 
@@ -384,9 +388,22 @@
       return tag.indexOf('en') === 0 ? 'en' : 'fr';
     }
 
+    var LANG_KEY = 'papote_lang';
+    // The choice made with the FR / EN switch; null when there is none or
+    // localStorage is unavailable (sandboxed iframe, private mode).
+    function storedLang() {
+      try {
+        var v = localStorage.getItem(LANG_KEY);
+        return v === 'fr' || v === 'en' ? v : null;
+      } catch (e) { return null; }
+    }
+    function storeLang(l) {
+      try { localStorage.setItem(LANG_KEY, l); } catch (e) {}
+    }
+
     var TOPICS_FR = window.PAPOTE_TOPICS.topics;
     var WORDS_FR = (window.PAPOTE_WORDS && window.PAPOTE_WORDS.words) || [];
-    var LANG = pickLang((navigator.languages && navigator.languages[0]) || navigator.language);
+    var LANG = storedLang() || pickLang((navigator.languages && navigator.languages[0]) || navigator.language);
     var TOPICS = (LANG === 'en' && window.PAPOTE_TOPICS_EN) ? window.PAPOTE_TOPICS_EN.topics : TOPICS_FR;
 
     function t(key) {
@@ -463,6 +480,12 @@
       var cells = $('days-row').children;
       var wk = t('week');
       for (var d = 0; d < cells.length && d < wk.length; d++) cells[d].lastElementChild.textContent = wk[d];
+      var opts = document.querySelectorAll('.lang-opt');
+      for (var o = 0; o < opts.length; o++) {
+        var on = opts[o].getAttribute('data-lang') === LANG;
+        opts[o].classList.toggle('on', on);
+        opts[o].setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
       document.documentElement.lang = LANG;
     }
 
@@ -1036,6 +1059,16 @@
       pressable('tab-favoris', function () { setTab('favoris'); });
       pressable('fav-empty-back', function () { setTab('today'); });
       pressable('retry-btn', loadState);
+      var langOpts = document.querySelectorAll('.lang-opt');
+      for (var lo = 0; lo < langOpts.length; lo++) {
+        (function (btn) {
+          btn.addEventListener('click', function () {
+            var l = btn.getAttribute('data-lang');
+            storeLang(l);
+            setLang(l);
+          });
+        })(langOpts[lo]);
+      }
       $('sh-cancel').addEventListener('click', closeSheet);
       $('sh-save').addEventListener('click', saveSheet);
       $('sheet-backdrop').addEventListener('click', closeSheet);
@@ -1054,13 +1087,16 @@
     applyStaticStrings();
     loadState();
     // The platform locale, when someone has picked one in Homeroom, wins
-    // over the phone's language. Guarded: it can be absent outside the shell.
+    // over the phone's language — unless a choice was made with the FR / EN
+    // switch, which always wins. Guarded: it can be absent outside the shell.
     if (window.usernode && typeof window.usernode.getUserLocale === 'function') {
       window.usernode.getUserLocale().then(function (r) {
+        if (storedLang()) return;
         if (r && r.locale) setLang(pickLang(r.locale));
       }).catch(function () {});
     }
     window.addEventListener('usernode:locale-changed', function (e) {
+      if (storedLang()) return;
       var tag = (e.detail && e.detail.locale) || (navigator.languages && navigator.languages[0]) || navigator.language;
       setLang(pickLang(tag));
     });
