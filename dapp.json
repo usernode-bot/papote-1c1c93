@@ -25,6 +25,11 @@
       ]
     },
     {
+      "name": "Child switcher with several children (demo)",
+      "path": "/?demo=1",
+      "expectSelector": "#main-view:not([hidden]) #hi .hi-chev"
+    },
+    {
       "name": "Word of the day",
       "path": "/?demo=1",
       "expectSelector": "#main-view:not([hidden]) #word-section:not([hidden]) #word-text"

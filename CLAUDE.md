@@ -83,7 +83,8 @@ follows it, and updates it when a request changes the look on purpose.
   reuses that rim, badge, section labels and tip box, and adds the
   pictogram square (a 64px rounded square in `--raised` with the drawing
   in `--accent`) and the quiet pills (synonyms and associations in
-  `--raised`, not tappable).
+  `--raised`, not tappable). The child picker reuses the bottom sheet with
+  a grouped list, the current child marked by an accent tick.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
   in `tailwind.config.js`. The card's question is set in the serif stack
   (`ui-serif`), everything else in the rounded system sans.
