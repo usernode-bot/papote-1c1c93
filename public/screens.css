@@ -94,10 +94,11 @@
 
 .hint {text-align:center;font-size:14px;line-height:20px;color:rgb(var(--muted));margin-top:12px}
 
-/* Pinned to the bottom edge of the viewport (the column's bottom padding
-   reserves room for it), so the bar and its labels are never scrolled off
-   and the actions and the hint always sit fully above it. */
-.tabs {position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:390px;max-width:100%;height:calc(64px + env(safe-area-inset-bottom, 0px));padding-bottom:env(safe-area-inset-bottom, 0px);background:rgb(var(--surface));border-top:1px solid rgb(var(--line));display:flex;z-index:30}
+/* Pinned to the bottom edge of the viewport and spanning its whole width
+   (the column's bottom padding reserves room for it), so the bar and its
+   labels are never scrolled off and the actions and the hint always sit
+   fully above it, with its surface and top line reaching both edges. */
+.tabs {position:fixed;bottom:0;left:0;right:0;width:100%;height:calc(64px + env(safe-area-inset-bottom, 0px));padding-bottom:env(safe-area-inset-bottom, 0px);background:rgb(var(--surface));border-top:1px solid rgb(var(--line));display:flex;z-index:30}
 
 .tabs div {flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;line-height:20px;color:rgb(var(--muted));cursor:pointer;white-space:nowrap}
 
