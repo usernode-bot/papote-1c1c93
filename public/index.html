@@ -247,6 +247,16 @@
     </div>
   </div>
 
+  <!-- Child picker: the name line's quick switch when several children exist -->
+  <div id="picker" class="sheet" role="dialog" aria-modal="true" aria-label="Vos enfants" data-i18n-aria="childrenLabel" hidden>
+    <div class="sheet-head"><div class="sheet-title" data-i18n="childrenLabel">Vos enfants</div><button id="pk-close" class="sheet-link" type="button" data-i18n="close">Fermer</button></div>
+    <ul id="pk-children" class="pick-list"></ul>
+    <ul class="pick-list">
+      <li><button id="pk-add" class="pick-row" type="button"><svg class="pick-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="pick-label" data-i18n="addChildRow">Ajouter un enfant</span></button></li>
+      <li><button id="pk-edit" class="pick-row" type="button"><svg class="pick-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg><span class="pick-label" data-i18n="editProfile">Modifier le profil</span></button></li>
+    </ul>
+  </div>
+
   <div id="toast" class="toast" hidden></div>
 
   <script src="/topics.js"></script>
@@ -309,6 +319,11 @@
         toastNameEmpty: 'Le prénom est vide.',
         toastChooseAge: 'Choisissez un âge.',
         openProfile: 'Ouvrir le profil',
+        switchChild: 'Changer d’enfant',
+        close: 'Fermer',
+        addChildRow: 'Ajouter un enfant',
+        editProfile: 'Modifier le profil',
+        childAge: function (age) { return age + ' ans'; },
         addFav: 'Ajouter aux favoris',
         removeFav: 'Retirer des favoris',
         nextTopic: 'Sujet suivant',
@@ -368,6 +383,11 @@
         toastNameEmpty: 'The first name is empty.',
         toastChooseAge: 'Choose an age.',
         openProfile: 'Open profile',
+        switchChild: 'Switch child',
+        close: 'Close',
+        addChildRow: 'Add a child',
+        editProfile: 'Edit profile',
+        childAge: function (age) { return 'age ' + age; },
         addFav: 'Add to favourites',
         removeFav: 'Remove from favourites',
         nextTopic: 'Next topic',
@@ -623,8 +643,28 @@
       var p = state.profile;
       var isGuest = !!state.guest;
 
-      // Header
-      $('hi').textContent = p ? t('forChild')(p.child_name, p.child_age) : 'Papote';
+      // Header: the name line, with a small down arrow when there is a list
+      // of children to open.
+      var hi = $('hi');
+      var several = !!(state.children && state.children.length > 1);
+      hi.textContent = '';
+      var hiText = document.createElement('span');
+      hiText.textContent = p ? t('forChild')(p.child_name, p.child_age) : 'Papote';
+      hi.appendChild(hiText);
+      if (several) {
+        var chev = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        chev.setAttribute('class', 'hi-chev');
+        chev.setAttribute('width', '16');
+        chev.setAttribute('height', '16');
+        chev.setAttribute('viewBox', '0 0 24 24');
+        chev.setAttribute('aria-hidden', 'true');
+        var chevPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        chevPath.setAttribute('d', 'M6 9l6 6 6-6');
+        chev.appendChild(chevPath);
+        hi.appendChild(chev);
+      }
+      hi.setAttribute('aria-label', p && several ? t('switchChild') : t('openProfile'));
+      if (!$('picker').hidden) renderPicker();
       $('streak-count').textContent = t('streak')(state.streak);
 
       // Week row
@@ -988,19 +1028,23 @@
       fillSheet(c);
       renderSheetChips();
       renderSheetChildren();
+      chooseChild(c);
+    }
+    // Switch the card to another child at once, with the same rollback the
+    // optimistic card actions use. A no-op on the child already chosen.
+    function chooseChild(c) {
       var prev = state.profile;
-      if (!prev || prev.id !== c.id) {
-        // Switching at once: the card behind the sheet is already worded for
-        // the child picked. Unsaved edits to the previous child are dropped.
-        state.profile = c;
-        render();
-        api('/api/children/' + c.id + '/choose', { method: 'POST' })
-          .then(loadStateSilent, function () {
-            state.profile = prev;
-            render();
-            toast(t('toastSaveErr'));
-          });
-      }
+      if (prev && prev.id === c.id) return;
+      // Switching at once: the card behind the sheet is already worded for
+      // the child picked. Unsaved edits to the previous child are dropped.
+      state.profile = c;
+      render();
+      api('/api/children/' + c.id + '/choose', { method: 'POST' })
+        .then(loadStateSilent, function () {
+          state.profile = prev;
+          render();
+          toast(t('toastSaveErr'));
+        });
     }
     function openNewChild() {
       sheetMode = 'new';
@@ -1020,6 +1064,74 @@
     function closeSheet() {
       $('sheet').hidden = true;
       $('sheet-backdrop').hidden = true;
+    }
+
+    // ── Child picker (the name line, with several children) ────────────────
+    function renderPicker() {
+      var list = $('pk-children');
+      list.innerHTML = '';
+      var children = state && state.children ? state.children : [];
+      var current = state && state.profile ? state.profile.id : null;
+      for (var i = 0; i < children.length; i++) {
+        (function (c) {
+          var li = document.createElement('li');
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'pick-row';
+          var text = document.createElement('span');
+          text.className = 'pick-text';
+          var name = document.createElement('span');
+          name.className = 'pick-name';
+          name.textContent = c.child_name;
+          var age = document.createElement('span');
+          age.className = 'pick-age';
+          age.textContent = t('childAge')(c.child_age);
+          text.appendChild(name);
+          text.appendChild(age);
+          b.appendChild(text);
+          if (c.id === current) {
+            b.setAttribute('aria-current', 'true');
+            var check = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            check.setAttribute('class', 'pick-check');
+            check.setAttribute('width', '20');
+            check.setAttribute('height', '20');
+            check.setAttribute('viewBox', '0 0 24 24');
+            check.setAttribute('aria-hidden', 'true');
+            var checkPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            checkPath.setAttribute('d', 'M5 12l5 5 9-10');
+            check.appendChild(checkPath);
+            b.appendChild(check);
+          }
+          b.addEventListener('click', function () {
+            closePicker();
+            chooseChild(c);
+          });
+          li.appendChild(b);
+          list.appendChild(li);
+        })(children[i]);
+      }
+      $('pk-add').hidden = children.length >= 5;
+    }
+    function openPicker() {
+      if (!state || !state.profile) return;
+      renderPicker();
+      $('picker').hidden = false;
+      $('sheet-backdrop').hidden = false;
+      var first = $('pk-children').querySelector('.pick-row');
+      if (first) first.focus();
+    }
+    function closePicker() {
+      if ($('picker').hidden) return;
+      $('picker').hidden = true;
+      $('sheet-backdrop').hidden = true;
+      $('hi').focus();
+    }
+    // The name line: with several children it opens the picker, with one the
+    // profile sheet, as it always did.
+    function onHiTap() {
+      if (!state || !state.profile) return;
+      if (state.children && state.children.length > 1) openPicker();
+      else openSheet();
     }
     function saveSheet() {
       var name = $('sh-name').value.trim();
@@ -1054,7 +1166,7 @@
       pressable('fav-btn', toggleFav);
       pressable('next-btn', nextTopic);
       pressable('back-link', backToToday);
-      pressable('hi', openSheet);
+      pressable('hi', onHiTap);
       pressable('tab-today', function () { setTab('today'); });
       pressable('tab-favoris', function () { setTab('favoris'); });
       pressable('fav-empty-back', function () { setTab('today'); });
@@ -1071,7 +1183,20 @@
       }
       $('sh-cancel').addEventListener('click', closeSheet);
       $('sh-save').addEventListener('click', saveSheet);
-      $('sheet-backdrop').addEventListener('click', closeSheet);
+      $('sheet-backdrop').addEventListener('click', function () {
+        if (!$('picker').hidden) { closePicker(); return; }
+        closeSheet();
+      });
+      $('pk-close').addEventListener('click', closePicker);
+      $('pk-add').addEventListener('click', function () {
+        closePicker();
+        openSheet();
+        openNewChild();
+      });
+      $('pk-edit').addEventListener('click', function () {
+        closePicker();
+        openSheet();
+      });
       $('sh-reminder').addEventListener('click', function () {
         sheetReminderOn = !sheetReminderOn;
         this.classList.toggle('on', sheetReminderOn);
